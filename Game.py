@@ -22,7 +22,9 @@ plat_speed = 2
 
 Player_pos = [2700, 400]
 Player_speed = 5
-Gravity = 10
+Gravity = 8
+
+on_platform = False
 
 W = False
 A = False
@@ -109,6 +111,7 @@ def create_platform():
 
 def player_press(symbol, modifiers):
     global W, A, S, D
+    global on_platform
 
     if symbol == arc.key.D:
         D = True
@@ -119,9 +122,13 @@ def player_press(symbol, modifiers):
     elif symbol == arc.key.W:
         W = True
 
+    elif symbol == arc.key.S:
+        on_platform = True
+
 
 def player_release(symbol, modifiers):
     global W, A, S, D
+    global on_platform
 
     if symbol == arc.key.D:
         D = False
@@ -131,6 +138,9 @@ def player_release(symbol, modifiers):
 
     elif symbol == arc.key.W:
         W = False
+
+    elif symbol == arc.key.S:
+        on_platform = False
 
 
 def player():
@@ -144,8 +154,9 @@ def player():
     if A is True:
         Player_pos[0] -= Player_speed
 
+    # JUMP
     if W is True:
-        Player_pos[1] = Player_pos[1] + 20
+        Player_pos[1] += 20
 
     cube = arc.load_texture("player.png", 0, 0, 64, 64)
     arc.draw_texture_rectangle(Player_pos[0], Player_pos[1], 50, 50, cube)
@@ -162,7 +173,7 @@ def player():
     # GRAVITY
     Player_pos[1] -= Gravity
 
-    if plat_pos - 90 < Player_pos[0] < plat_pos + 90 and 425 <= Player_pos[1] <= 435:
+    if plat_pos - 90 < Player_pos[0] < plat_pos + 90 and 425 <= Player_pos[1] <= 435 and on_platform is False:
         Player_pos[1] = 435
         Player_pos[0] += plat_speed
 
