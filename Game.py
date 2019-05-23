@@ -1,7 +1,7 @@
 import arcade as arc
-from playsound import playsound
+import random
 
-# Learn about lists so multiple platforms can be implemented.
+# Implement gravity / jumping
 
 SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 800
@@ -12,19 +12,20 @@ GAME = False
 button_transparency = 1
 button_pos = [300, 200]
 
-playsound("Spooky-Island.mp3", False)
-
 y_transition = 0
 transition_state = False
 
-plat_pos = 2700
-plat_speed = 2
+plat_speed_list = []
+plat_list_x = []
+plat_list_y = []
+plat_quantity = 20
 
 Player_pos = [2700, 400]
 Player_speed = 5
 Gravity = 8
 
 on_platform = False
+
 
 W = False
 A = False
@@ -34,7 +35,7 @@ D = False
 
 def update_everything(delta_time):
     global y_transition, transition_state, screen_tracker
-    global plat_pos, plat_speed
+    global plat_list_x, plat_speed_list
 
     screen_tracker = 300
     screen_tracker += y_transition
@@ -48,7 +49,6 @@ def update_everything(delta_time):
 
     create_platform()
     ground()
-
     player()
 
 
@@ -67,6 +67,10 @@ def title_screen():
 
     for multi in range(1, 5):
         arc.draw_texture_rectangle(300 + 600 * multi, 450, 600, 900, background)
+
+    for multi2 in range(1, 10):
+        arc.draw_texture_rectangle(2700, 800 * multi2 + 400, 600, 900, background)
+
     arc.draw_texture_rectangle(315, 680, 400, 180, title)
     arc.draw_texture_rectangle(button_pos[0], button_pos[1], 200, 100, button, 0, button_transparency)
     arc.draw_text("Play", 280, 192, arc.color.WHITE, 20, font_name="Calibri", bold=True, italic=True)
@@ -89,24 +93,29 @@ def button_click(x, y, button, modifiers):
 
     # Initializing game
     if button_area and button == arc.MOUSE_BUTTON_LEFT and screen_tracker == 300:
-        playsound("click.mp3", False)
         GAME = True
         transition_state = True
 
 
 def create_platform():
-    global plat_pos, plat_speed
-
-    plat_pos += plat_speed
-
-    if plat_pos >= 2925:
-        plat_speed = -plat_speed
-
-    elif plat_pos <= 2475:
-        plat_speed = -plat_speed
 
     platform = arc.load_texture("platform.png", 0, 0, 28, 11)
-    arc.draw_texture_rectangle(plat_pos, 400, 150, 30, platform)
+
+    for i in range(plat_quantity):
+        plat_list_y.append(i * 200 + 400)
+        plat_list_x.append(random.randint(2500, 2900))
+        plat_speed_list.append(random.choice([-2, 2, -3, 3]))
+        arc.draw_texture_rectangle(plat_list_x[i], plat_list_y[i], 150, 30, platform)
+
+        plat_list_x[i] += plat_speed_list[i]
+
+        if plat_list_x[i] > 2925:
+            plat_speed_list[i] = -plat_speed_list[i]
+
+        elif plat_list_x[i] < 2475:
+            plat_speed_list[i] = -plat_speed_list[i]
+
+        arc.draw_texture_rectangle(plat_list_x[i], plat_list_y[i], 150, 30, platform)
 
 
 def player_press(symbol, modifiers):
@@ -161,21 +170,24 @@ def player():
     cube = arc.load_texture("player.png", 0, 0, 64, 64)
     arc.draw_texture_rectangle(Player_pos[0], Player_pos[1], 50, 50, cube)
 
-    if Player_pos[1] <= 125:
-        Player_pos[1] = 125
+    for i in range(plat_quantity):
+        if Player_pos[1] <= 125:
+            Player_pos[1] = 125
 
-    if Player_pos[0] <= 2425:
-        Player_pos[0] = 2425
+        if Player_pos[0] <= 2425:
+            Player_pos[0] = 2425
 
-    if Player_pos[0] >= 2975:
-        Player_pos[0] = 2975
+        if Player_pos[0] >= 2975:
+            Player_pos[0] = 2975
+
+        if plat_list_x[i] - 90 < Player_pos[0] < plat_list_x[i] + 90 and plat_list_y[i] + 10 <= Player_pos[1] <= \
+                plat_list_y[i] + 48 and on_platform is False:
+            
+            Player_pos[1] = plat_list_y[i] + 48
+            Player_pos[0] += plat_speed_list[i]
 
     # GRAVITY
     Player_pos[1] -= Gravity
-
-    if plat_pos - 90 < Player_pos[0] < plat_pos + 90 and 425 <= Player_pos[1] <= 435 and on_platform is False:
-        Player_pos[1] = 435
-        Player_pos[0] += plat_speed
 
     if screen_tracker == 2700:
         arc.set_viewport(2400, 3000, Player_pos[1] - 115, Player_pos[1] + 670)
