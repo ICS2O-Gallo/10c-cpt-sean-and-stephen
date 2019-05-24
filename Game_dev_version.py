@@ -39,7 +39,7 @@ Player_pos = [2700, 100]
 Player_speed = 5
 jumpDuration = 0
 jumpCap = 15
-jumpSpeed = 30
+jumpSpeed = 45
 acceleration = 1.1
 airTime = 0
 
@@ -223,10 +223,10 @@ def player():
             onPlatform = True
 
     # GRAVITY
-    displacement = ((1 / 2) * acceleration * (airTime * 3))
+    displacement = ((1 / 2) * acceleration * (airTime ** 2))
     if onPlatform is False or onGround is False:
         Player_pos[1] = Player_pos[1] - displacement
-    print("onPlat:", str(onPlatform), "|", "onGround:", str(onGround), "diplacement:", displacement, "jumpDuration:", airTime)
+    print("onPlat:", str(onPlatform), "|", "onGround:", str(onGround), "|", "diplacement:", displacement, "|", "airTime:", airTime)
 
 # PLATFORM / GROUND ----------------------------------------------------------------------------------------------------
 def create_platform():
