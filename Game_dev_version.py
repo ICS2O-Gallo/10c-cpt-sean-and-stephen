@@ -35,12 +35,13 @@ plat_list_y = []
 plat_quantity = 20
 
 # Player variables
-Player_pos = [2700, 400]
+Player_pos = [2700, 100]
 Player_speed = 5
-Gravity = 8
 jumpDuration = 0
 jumpCap = 15
 jumpSpeed = 30
+acceleration = 1.1
+airTime = 0
 
 # Variables for ground/platform collision
 onPlatform = False
@@ -52,8 +53,7 @@ A = False
 S = False
 D = False
 
-view_mode = input("View_mode (play, title, full) > ")
-
+view_mode = input("Viewmode: play, title, full > ")
 
 # UPDATE ---------------------------------------------------------------------------------------------------------------
 def update_everything(delta_time):
@@ -66,13 +66,13 @@ def update_everything(delta_time):
     if view_mode == "full":
         arc.set_viewport(0, 3000, 0, 3000)
 
-    elif view_mode == "title":
-        arc.set_viewport(0, 600, 0, 800)
-
     elif view_mode == "play":
         arc.set_viewport(2400, 3000, 0, 800)
 
-    print("onPlat:", str(onPlatform), "|", "onGround:", str(onGround))
+    elif view_mode == "title":
+        arc.set_viewport(0, 600, 0, 800)
+
+
 
 
 # TITLE SCREEN LOGIC ---------------------------------------------------------------------------------------------------
@@ -173,7 +173,8 @@ def button_click(x, y, button, modifiers):
 # PLAYER ---------------------------------------------------------------------------------------------------------------
 def player():
     global W, A, S, D
-    global screen_tracker, jumpDuration, onPlatform, onGround
+    global screen_tracker, jumpDuration, onPlatform, onGround, airTime
+
 
     # MOVEMENT
     if D is True:
@@ -192,6 +193,9 @@ def player():
         jumpDuration = 0
         onPlatform = False
         onGround = False
+        airTime = -1
+
+    airTime += 1
 
     # Drawing player
     cube = arc.load_texture("player.png", 0, 0, 64, 64)
@@ -219,8 +223,10 @@ def player():
             onPlatform = True
 
     # GRAVITY
-    Player_pos[1] -= Gravity
-
+    displacement = ((1 / 2) * acceleration * (airTime * 3))
+    if onPlatform is False or onGround is False:
+        Player_pos[1] = Player_pos[1] - displacement
+    print("onPlat:", str(onPlatform), "|", "onGround:", str(onGround), "diplacement:", displacement, "jumpDuration:", airTime)
 
 # PLATFORM / GROUND ----------------------------------------------------------------------------------------------------
 def create_platform():
