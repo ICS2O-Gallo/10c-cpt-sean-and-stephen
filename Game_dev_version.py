@@ -224,6 +224,8 @@ def player():
 
     # GRAVITY
     displacement = ((1 / 2) * acceleration * (airTime ** 2))
+    if displacement > (Player_pos[1] - 125):
+        displacement = (Player_pos[1] - 125)
     if onPlatform is False or onGround is False:
         Player_pos[1] = Player_pos[1] - displacement
     print("onPlat:", str(onPlatform), "|", "onGround:", str(onGround), "|", "diplacement:", displacement, "|", "airTime:", airTime)
