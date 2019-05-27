@@ -39,8 +39,8 @@ Player_pos = [2700, 100]
 Player_speed = 5
 jumpDuration = 0
 jumpCap = 15
-jumpSpeed = 45
-acceleration = 1
+jumpSpeed = 40
+acceleration = 2
 airTime = 0
 
 # Variables for ground/platform collision
@@ -69,6 +69,7 @@ def update_everything(delta_time):
 
     elif view_mode == "play":
         arc.set_viewport(2400, 3000, 0, 800)
+        arc.set_viewport(2400, 3000, Player_pos[1] - 100, Player_pos[1] + 700)
 
     elif view_mode == "title":
         arc.set_viewport(0, 600, 0, 800)
@@ -172,7 +173,7 @@ def button_click(x, y, button, modifiers):
 # PLAYER ---------------------------------------------------------------------------------------------------------------
 def player():
     global W, A, S, D
-    global screen_tracker, jumpDuration, onPlatform, onGround, airTime
+    global screen_tracker, jumpDuration, onPlatform, onGround, airTime, displacement
 
     # MOVEMENT
     if D is True:
@@ -221,7 +222,7 @@ def player():
             onPlatform = True
 
     # GRAVITY
-    displacement = ((1 / 2) * acceleration * (airTime * 10))
+    displacement = ((2 * airTime) + ((1 / 2) * acceleration * airTime))
     if displacement > (Player_pos[1] - 125):
         displacement = (Player_pos[1] - 125)
     if onPlatform is False or onGround is False:
@@ -247,7 +248,7 @@ def create_platform():
 
         elif plat_list_x[i] < 2475:
             plat_speed_list[i] = -plat_speed_list[i]
-
+        
         arc.draw_texture_rectangle(plat_list_x[i], plat_list_y[i], 150, 30, platform)
 
 
@@ -275,3 +276,4 @@ def screen_setup():
 
 
 screen_setup()
+
