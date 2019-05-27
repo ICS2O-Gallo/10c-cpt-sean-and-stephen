@@ -40,7 +40,7 @@ Player_speed = 5
 jumpDuration = 0
 jumpCap = 15
 jumpSpeed = 45
-acceleration = 1.1
+acceleration = 1
 airTime = 0
 
 # Variables for ground/platform collision
@@ -54,6 +54,7 @@ S = False
 D = False
 
 view_mode = input("Viewmode: play, title, full > ")
+
 
 # UPDATE ---------------------------------------------------------------------------------------------------------------
 def update_everything(delta_time):
@@ -71,8 +72,6 @@ def update_everything(delta_time):
 
     elif view_mode == "title":
         arc.set_viewport(0, 600, 0, 800)
-
-
 
 
 # TITLE SCREEN LOGIC ---------------------------------------------------------------------------------------------------
@@ -175,7 +174,6 @@ def player():
     global W, A, S, D
     global screen_tracker, jumpDuration, onPlatform, onGround, airTime
 
-
     # MOVEMENT
     if D is True:
         Player_pos[0] += Player_speed
@@ -215,20 +213,22 @@ def player():
 
         # The range of a platform that a player can "land" on
         platform_x = plat_list_x[i] - 90 < Player_pos[0] < plat_list_x[i] + 90
-        platform_y = plat_list_y[i] + 10 <= Player_pos[1] <= plat_list_y[i] + 48
+        platform_y = plat_list_y[i] - 50 <= Player_pos[1] <= plat_list_y[i] + 37
 
         if platform_x and platform_y:
-            Player_pos[1] = plat_list_y[i] + 48
+            Player_pos[1] = plat_list_y[i] + 37
             Player_pos[0] += plat_speed_list[i]
             onPlatform = True
 
     # GRAVITY
-    displacement = ((1 / 2) * acceleration * (airTime ** 2))
+    displacement = ((1 / 2) * acceleration * (airTime * 10))
     if displacement > (Player_pos[1] - 125):
         displacement = (Player_pos[1] - 125)
     if onPlatform is False or onGround is False:
         Player_pos[1] = Player_pos[1] - displacement
-    print("onPlat:", str(onPlatform), "|", "onGround:", str(onGround), "|", "diplacement:", displacement, "|", "airTime:", airTime)
+    print("onPlat:", str(onPlatform), "|", "onGround:", str(onGround), "|", "displacement:", displacement, "|",
+          "airTime:", airTime)
+
 
 # PLATFORM / GROUND ----------------------------------------------------------------------------------------------------
 def create_platform():
