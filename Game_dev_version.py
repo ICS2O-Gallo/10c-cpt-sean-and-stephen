@@ -1,7 +1,6 @@
 import arcade as arc
 import random
 
-# Implement realistic gravity
 # Fix bug that makes player able to jump for extended periods of time using the platforms
 # Add "death" feature when player leaves viewport
 
