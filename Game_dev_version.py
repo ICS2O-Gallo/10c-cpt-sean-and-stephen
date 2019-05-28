@@ -40,8 +40,8 @@ Player_speed = 5
 Player_score = 0
 jumpDuration = 0
 jumpCap = 15
-jumpSpeed = 40
-acceleration = 2
+jumpSpeed = 25
+acceleration = 1.5
 airTime = 0
 
 # Variables for ground/platform collision
@@ -49,7 +49,7 @@ onPlatform = False
 onGround = False
 
 # Game progression variables
-upProgress = 0
+upProgress = 2
 upSpeed = 0.5
 frameCount = 0
 
@@ -73,8 +73,8 @@ def update_everything(delta_time):
 
     frameCount += 1
 
-    if frameCount % 1000 == 0:
-        upSpeed += 0.5
+    if frameCount % 500 == 0:
+        upSpeed *= 2
 
 
 # SCREEN LOGIC ---------------------------------------------------------------------------------------------------
@@ -167,7 +167,7 @@ def player_release(symbol, modifiers):
 
 
 def mouse_detection(x, y, dx, dy):
-    global button_pos, button_transparency, button_area_1, button_area_2
+    global button_pos, button_transparency, button_area_1, button_area_2, Player_pos
 
     # Detects when mouse is over the button
     button_area_1 = button_pos[0] - 100 <= x <= button_pos[0] + 100 and button_pos[1] - 50 <= y <= button_pos[1] + 50
@@ -182,15 +182,15 @@ def mouse_detection(x, y, dx, dy):
 
 
 def button_click(x, y, button, modifiers):
-    global button_area_1, button_area_2, transition_state
+    global button_area_1, button_area_2, transition_state, screen_tracker
 
     # Initializing game
     if button_area_1 and button == arc.MOUSE_BUTTON_LEFT and screen_tracker == 300:
         transition_state = True
 
+    # Restart logic goes here
     elif button_area_2 and button == arc.MOUSE_BUTTON_LEFT:
-        # Restart logic goes here
-        pass
+        reset()
 
 
 # PLAYER ---------------------------------------------------------------------------------------------------------------
@@ -245,7 +245,7 @@ def player():
             onPlatform = True
 
     # GRAVITY
-    displacement = ((2 * airTime) + ((1 / 2) * acceleration * airTime))
+    displacement = ((1 / 2) * acceleration * airTime)
     if displacement > (Player_pos[1] - 125):
         displacement = (Player_pos[1] - 125)
     if onPlatform is False or onGround is False:
@@ -259,6 +259,14 @@ def death():
     arc.set_viewport(3000, 3600, 0, 800)
     # Disables jumping back into game
     jumpSpeed = 0
+
+
+def reset():
+    global screen_tracker
+    screen_tracker = 300
+    Player_pos[0] = 2700
+    Player_pos[1] = 100
+    arc.set_viewport(0, 600, 0, 800)
 
 
 # PLATFORM / GROUND ----------------------------------------------------------------------------------------------------
