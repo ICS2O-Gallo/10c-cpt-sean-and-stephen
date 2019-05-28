@@ -1,6 +1,7 @@
 import arcade as arc
 import random
 
+# Implement realistic gravity
 # Fix bug that makes player able to jump for extended periods of time using the platforms
 # Add "death" feature when player leaves viewport
 
@@ -18,8 +19,8 @@ title_y = 680
 title_speed = 0.2
 
 # Button variables
-button_transparency = 1
-button_pos = [300, 200]
+button_transparency = [1, 1]
+button_pos = [300, 200, 3300, 200]
 
 # Variables for transition from menu into game
 x_transition = 0
@@ -31,11 +32,12 @@ transition_speed = 20
 plat_speed_list = []
 plat_list_x = []
 plat_list_y = []
-plat_quantity = 20
+plat_quantity = 5
 
 # Player variables
 Player_pos = [2700, 100]
 Player_speed = 5
+Player_score = 0
 jumpDuration = 0
 jumpCap = 15
 jumpSpeed = 40
@@ -46,35 +48,36 @@ airTime = 0
 onPlatform = False
 onGround = False
 
+# Game progression variables
+upProgress = 0
+upSpeed = 0.5
+frameCount = 0
+
 # Keypress variables
 W = False
 A = False
 S = False
 D = False
 
-view_mode = input("Viewmode: play, title, full > ")
-
 
 # UPDATE ---------------------------------------------------------------------------------------------------------------
 def update_everything(delta_time):
+    global upProgress, upSpeed, frameCount
     title_screen()
-    # transition(transition_state)
+    transition(transition_state)
     create_platform()
     ground()
     player()
 
-    if view_mode == "full":
-        arc.set_viewport(0, 3000, 0, 3000)
+    upProgress += upSpeed
 
-    elif view_mode == "play":
-        arc.set_viewport(2400, 3000, 0, 800)
-        arc.set_viewport(2400, 3000, Player_pos[1] - 100, Player_pos[1] + 700)
+    frameCount += 1
 
-    elif view_mode == "title":
-        arc.set_viewport(0, 600, 0, 800)
+    if frameCount % 1000 == 0:
+        upSpeed += 0.5
 
 
-# TITLE SCREEN LOGIC ---------------------------------------------------------------------------------------------------
+# SCREEN LOGIC ---------------------------------------------------------------------------------------------------
 def title_screen():
     global button_pos, button_transparency, title_y, title_speed, x_transition, screen_tracker, transition_state
 
@@ -83,9 +86,12 @@ def title_screen():
     background = arc.load_texture("background.png", 0, 0, 320, 256)
     title = arc.load_texture("title_text.png", 0, 0, 1225, 459)
     button = arc.load_texture("label.png", 0, 36, 48, 12)
+    game_over = arc.load_texture("game_over.png", 0, 0, 1074, 144)
+    game_over_back = arc.load_texture("game_over_back.png", 0, 0, 320, 256)
 
     # Putting textures onto screen
     arc.draw_texture_rectangle(300, 450, 600, 900, background)
+    arc.draw_texture_rectangle(3300, 450, 600, 900, game_over_back)
 
     for multi in range(1, 5):
         arc.draw_texture_rectangle(300 + 600 * multi, 450, 600, 900, background)
@@ -94,6 +100,8 @@ def title_screen():
         arc.draw_texture_rectangle(2700, 800 * multi2 + 400, 600, 900, background)
 
     arc.draw_texture_rectangle(315, title_y, 400, 180, title)
+    arc.draw_texture_rectangle(3300, title_y, 400, 75, game_over)
+
     title_y += title_speed
 
     if title_y >= 690:
@@ -102,12 +110,14 @@ def title_screen():
     elif title_y <= 670:
         title_speed = -title_speed
 
-    arc.draw_texture_rectangle(button_pos[0], button_pos[1], 200, 100, button, 0, button_transparency)
+    arc.draw_texture_rectangle(button_pos[0], button_pos[1], 200, 100, button, 0, button_transparency[0])
+    arc.draw_texture_rectangle(button_pos[2], button_pos[3], 200, 100, button, 0, button_transparency[1])
     arc.draw_text("Play", 280, 192, arc.color.WHITE, 20, font_name="Calibri", bold=True, italic=True)
+    arc.draw_text("Restart", 3260, 192, arc.color.WHITE, 20, font_name="Calibri", bold=True, italic=True)
 
 
-# TRANSITION -----------------------------------------------------------------------------------------------------------
-'''def transition(state):
+# SCREENS/VIEWPORTS ----------------------------------------------------------------------------------------------------
+def transition(state):
     global transition_speed, screen_tracker
     if state:
         arc.set_viewport(screen_tracker - 300, screen_tracker + 300, 0, 800)
@@ -115,11 +125,18 @@ def title_screen():
 
         if screen_tracker == PLAY_AREA_CENTER:
             transition_speed = 0
+            level_progression()
 
-    # When transition reaches center of play area,
-    # Viewport tracks player
-    if screen_tracker == PLAY_AREA_CENTER:
-        arc.set_viewport(2400, 3000, Player_pos[1] - 115, Player_pos[1] + 670)'''
+
+def level_progression():
+    global lower, upper
+    lower = upProgress
+    upper = 800 + upProgress
+
+    arc.set_viewport(2400, 3000, lower, upper)
+
+    if Player_pos[1] <= lower:
+        death()
 
 
 # KEY/MOUSE PRESS/RELEASE ----------------------------------------------------------------------------------------------
@@ -150,23 +167,30 @@ def player_release(symbol, modifiers):
 
 
 def mouse_detection(x, y, dx, dy):
-    global button_pos, button_transparency, button_area
+    global button_pos, button_transparency, button_area_1, button_area_2
 
     # Detects when mouse is over the button
-    button_area = button_pos[0] - 100 <= x <= button_pos[0] + 100 and button_pos[1] - 50 <= y <= button_pos[1] + 50
+    button_area_1 = button_pos[0] - 100 <= x <= button_pos[0] + 100 and button_pos[1] - 50 <= y <= button_pos[1] + 50
+    button_area_2 = button_pos[2] - 100 <= x <= button_pos[2] + 100 and button_pos[3] - 50 <= y <= button_pos[3] + 50
 
-    if button_area:
-        button_transparency = 0.5
+    if button_area_1 or button_area_2:
+        button_transparency[0] = 0.5
+        button_transparency[1] = 0.5
     else:
-        button_transparency = 1
+        button_transparency[0] = 1
+        button_transparency[1] = 1
 
 
 def button_click(x, y, button, modifiers):
-    global button_area, transition_state
+    global button_area_1, button_area_2, transition_state
 
     # Initializing game
-    if button_area and button == arc.MOUSE_BUTTON_LEFT and screen_tracker == 300:
+    if button_area_1 and button == arc.MOUSE_BUTTON_LEFT and screen_tracker == 300:
         transition_state = True
+
+    elif button_area_2 and button == arc.MOUSE_BUTTON_LEFT:
+        # Restart logic goes here
+        pass
 
 
 # PLAYER ---------------------------------------------------------------------------------------------------------------
@@ -221,25 +245,42 @@ def player():
             onPlatform = True
 
     # GRAVITY
-    displacement = ((2 * airTime) + ((1 / 2) * acceleration * airTime))
+    displacement = ((2 * airTime) + ((1 / 2) ** acceleration * airTime))
     if displacement > (Player_pos[1] - 125):
         displacement = (Player_pos[1] - 125)
     if onPlatform is False or onGround is False:
         Player_pos[1] = Player_pos[1] - displacement
     print("onPlat:", str(onPlatform), "|", "onGround:", str(onGround), "|", "displacement:", displacement, "|",
-          "airTime:", airTime)
+          "airTime:", airTime, "|", "Frame:", frameCount, "|", "upSpeed:", upSpeed, "|", "Screen:", screen_tracker)
+
+
+def death():
+    global jumpSpeed
+    arc.set_viewport(3000, 3600, 0, 800)
+    # Disables jumping back into game
+    jumpSpeed = 0
 
 
 # PLATFORM / GROUND ----------------------------------------------------------------------------------------------------
 def create_platform():
+    global upProgress
     platform = arc.load_texture("platform.png", 0, 0, 28, 11)
 
     for i in range(plat_quantity):
+        # Creating and appending platforms coordinates and speeds to their respective lists
         plat_list_y.append(i * 300 + 400)
         plat_list_x.append(random.randint(2500, 2900))
         plat_speed_list.append(random.choice([-2, 2, -3, 3]))
         arc.draw_texture_rectangle(plat_list_x[i], plat_list_y[i], 150, 30, platform)
 
+        bot = upProgress
+        top = 800 + upProgress
+
+        if plat_list_y[i] < bot:
+            plat_list_y[i] = top
+            plat_list_x[i] = random.randint(2500, 2900)
+
+        # Moving the platforms
         plat_list_x[i] += plat_speed_list[i]
 
         if plat_list_x[i] > 2925:
@@ -247,7 +288,7 @@ def create_platform():
 
         elif plat_list_x[i] < 2475:
             plat_speed_list[i] = -plat_speed_list[i]
-        
+
         arc.draw_texture_rectangle(plat_list_x[i], plat_list_y[i], 150, 30, platform)
 
 
@@ -275,4 +316,3 @@ def screen_setup():
 
 
 screen_setup()
-
