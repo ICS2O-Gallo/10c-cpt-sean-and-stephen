@@ -330,7 +330,7 @@ def find_player():
 # PLATFORM / GROUND ----------------------------------------------------------------------------------------------------
 def create_platform():
     global upProgress
-    platform = load_texture("platform.png", 0, 0, 28, 11)
+    platform = load_texture("platform2.png", 0, 0, 28, 11)
 
     for i in range(plat_quantity):
         # Creating and appending platforms coordinates and speeds to their respective lists
