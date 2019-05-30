@@ -1,5 +1,6 @@
-import arcade as arc
+from arcade import *
 import random
+import math
 
 # Implement realistic gravity
 # Fix bug that makes player able to jump for extended periods of time using the platforms
@@ -37,6 +38,7 @@ plat_quantity = 5
 # Player variables
 Player_pos = [2700, 100]
 Player_speed = 5
+Player_size = 50
 Player_score = 0
 jumpDuration = 0
 jumpCap = 15
@@ -59,6 +61,11 @@ A = False
 S = False
 D = False
 
+# Laser Variables
+laserAngles = [45]
+laserPos_x = [2400]
+laserSpeed = [0.2]
+
 
 # UPDATE ---------------------------------------------------------------------------------------------------------------
 def update_everything(delta_time):
@@ -68,6 +75,8 @@ def update_everything(delta_time):
     create_platform()
     ground()
     player()
+    find_player()
+    laser()
 
     upProgress += upSpeed
 
@@ -81,26 +90,26 @@ def update_everything(delta_time):
 def title_screen():
     global button_pos, button_transparency, title_y, title_speed, x_transition, screen_tracker, transition_state
 
-    arc.start_render()
+    start_render()
     # Loading the textures for screen
-    background = arc.load_texture("background.png", 0, 0, 320, 256)
-    title = arc.load_texture("title_text.png", 0, 0, 1225, 459)
-    button = arc.load_texture("label.png", 0, 36, 48, 12)
-    game_over = arc.load_texture("game_over.png", 0, 0, 1074, 144)
-    game_over_back = arc.load_texture("game_over_back.png", 0, 0, 320, 256)
+    background = load_texture("background.png", 0, 0, 320, 256)
+    title = load_texture("title_text.png", 0, 0, 1225, 459)
+    button = load_texture("label.png", 0, 36, 48, 12)
+    game_over = load_texture("game_over.png", 0, 0, 1074, 144)
+    game_over_back = load_texture("game_over_back.png", 0, 0, 320, 256)
 
     # Putting textures onto screen
-    arc.draw_texture_rectangle(300, 450, 600, 900, background)
-    arc.draw_texture_rectangle(3300, 450, 600, 900, game_over_back)
+    draw_texture_rectangle(300, 450, 600, 900, background)
+    draw_texture_rectangle(3300, 450, 600, 900, game_over_back)
 
     for multi in range(1, 5):
-        arc.draw_texture_rectangle(300 + 600 * multi, 450, 600, 900, background)
+        draw_texture_rectangle(300 + 600 * multi, 450, 600, 900, background)
 
     for multi2 in range(1, 10):
-        arc.draw_texture_rectangle(2700, 800 * multi2 + 400, 600, 900, background)
+        draw_texture_rectangle(2700, 800 * multi2 + 400, 600, 900, background)
 
-    arc.draw_texture_rectangle(315, title_y, 400, 180, title)
-    arc.draw_texture_rectangle(3300, title_y, 400, 75, game_over)
+    draw_texture_rectangle(315, title_y, 400, 180, title)
+    draw_texture_rectangle(3300, title_y, 400, 75, game_over)
 
     title_y += title_speed
 
@@ -110,17 +119,17 @@ def title_screen():
     elif title_y <= 670:
         title_speed = -title_speed
 
-    arc.draw_texture_rectangle(button_pos[0], button_pos[1], 200, 100, button, 0, button_transparency[0])
-    arc.draw_texture_rectangle(button_pos[2], button_pos[3], 200, 100, button, 0, button_transparency[1])
-    arc.draw_text("Play", 280, 192, arc.color.WHITE, 20, font_name="Calibri", bold=True, italic=True)
-    arc.draw_text("Restart", 3260, 192, arc.color.WHITE, 20, font_name="Calibri", bold=True, italic=True)
+    draw_texture_rectangle(button_pos[0], button_pos[1], 200, 100, button, 0, button_transparency[0])
+    draw_texture_rectangle(button_pos[2], button_pos[3], 200, 100, button, 0, button_transparency[1])
+    draw_text("Play", 280, 192, color.WHITE, 20, font_name="Calibri", bold=True, italic=True)
+    draw_text("Restart", 3260, 192, color.WHITE, 20, font_name="Calibri", bold=True, italic=True)
 
 
 # SCREENS/VIEWPORTS ----------------------------------------------------------------------------------------------------
 def transition(state):
     global transition_speed, screen_tracker
     if state:
-        arc.set_viewport(screen_tracker - 300, screen_tracker + 300, 0, 800)
+        set_viewport(screen_tracker - 300, screen_tracker + 300, 0, 800)
         screen_tracker += transition_speed
 
         if screen_tracker == PLAY_AREA_CENTER:
@@ -133,7 +142,7 @@ def level_progression():
     lower = upProgress
     upper = 800 + upProgress
 
-    arc.set_viewport(2400, 3000, lower, upper)
+    set_viewport(2400, 3000, lower, upper)
 
     if Player_pos[1] <= lower:
         death()
@@ -143,26 +152,26 @@ def level_progression():
 def player_press(symbol, modifiers):
     global W, A, D
 
-    if symbol == arc.key.D:
+    if symbol == key.D:
         D = True
 
-    elif symbol == arc.key.A:
+    elif symbol == key.A:
         A = True
 
-    elif symbol == arc.key.W:
+    elif symbol == key.W:
         W = True
 
 
 def player_release(symbol, modifiers):
     global W, A, D
 
-    if symbol == arc.key.D:
+    if symbol == key.D:
         D = False
 
-    elif symbol == arc.key.A:
+    elif symbol == key.A:
         A = False
 
-    elif symbol == arc.key.W:
+    elif symbol == key.W:
         W = False
 
 
@@ -185,12 +194,13 @@ def button_click(x, y, button, modifiers):
     global button_area_1, button_area_2, transition_state, screen_tracker
 
     # Initializing game
-    if button_area_1 and button == arc.MOUSE_BUTTON_LEFT and screen_tracker == 300:
+    if button_area_1 and button == MOUSE_BUTTON_LEFT and screen_tracker == 300:
         transition_state = True
 
     # Restart logic goes here
-    elif button_area_2 and button == arc.MOUSE_BUTTON_LEFT:
+    elif button_area_2 and button == MOUSE_BUTTON_LEFT:
         reset()
+        print("Pressed")
 
 
 # PLAYER ---------------------------------------------------------------------------------------------------------------
@@ -220,9 +230,8 @@ def player():
     airTime += 1
 
     # Drawing player
-    cube = arc.load_texture("player.png", 0, 0, 64, 64)
-    arc.draw_texture_rectangle(Player_pos[0], Player_pos[1], 50, 50, cube)
-
+    cube = load_texture("player.png", 0, 0, 64, 64)
+    draw_texture_rectangle(Player_pos[0], Player_pos[1], Player_size, Player_size, cube)
     # All collision (sides of screen, ground, platforms)
     for i in range(plat_quantity):
         if Player_pos[1] <= 125:
@@ -255,8 +264,8 @@ def player():
 
 
 def death():
-    global jumpSpeed
-    arc.set_viewport(3000, 3600, 0, 800)
+    global jumpSpeed, screen_tracker
+    set_viewport(3000, 3600, 0, 800)
     # Disables jumping back into game
     jumpSpeed = 0
 
@@ -266,20 +275,41 @@ def reset():
     screen_tracker = 300
     Player_pos[0] = 2700
     Player_pos[1] = 100
-    arc.set_viewport(0, 600, 0, 800)
+    set_viewport(0, 600, 0, 800)
+    screen_tracker = 300
+
+
+# LASER ----------------------------------------------------------------------------------------------------------------
+def laser():
+    if screen_tracker == 2700:
+        for i in range(len(laserPos_x)):
+            draw_rectangle_filled(laserPos_x[i], upProgress, 2000, 1, color.RED, laserAngles[i])
+
+
+def find_player():
+    for i in range(len(laserAngles)):
+        root_y = Player_pos[1] - upProgress
+        root_x = Player_pos[0] - 2400
+        true_angle = math.degrees(math.atan(root_y / root_x))
+
+        if laserAngles[i] > true_angle:
+            laserAngles[i] -= laserSpeed[i]
+
+        if laserAngles[i] < true_angle:
+            laserAngles[i] += laserSpeed[i]
 
 
 # PLATFORM / GROUND ----------------------------------------------------------------------------------------------------
 def create_platform():
     global upProgress
-    platform = arc.load_texture("platform.png", 0, 0, 28, 11)
+    platform = load_texture("platform.png", 0, 0, 28, 11)
 
     for i in range(plat_quantity):
         # Creating and appending platforms coordinates and speeds to their respective lists
         plat_list_y.append(i * 300 + 400)
         plat_list_x.append(random.randint(2500, 2900))
         plat_speed_list.append(random.choice([-2, 2, -3, 3]))
-        arc.draw_texture_rectangle(plat_list_x[i], plat_list_y[i], 150, 30, platform)
+        draw_texture_rectangle(plat_list_x[i], plat_list_y[i], 150, 30, platform)
 
         bot = upProgress
         top = 800 + upProgress
@@ -297,30 +327,30 @@ def create_platform():
         elif plat_list_x[i] < 2475:
             plat_speed_list[i] = -plat_speed_list[i]
 
-        arc.draw_texture_rectangle(plat_list_x[i], plat_list_y[i], 150, 30, platform)
+        draw_texture_rectangle(plat_list_x[i], plat_list_y[i], 150, 30, platform)
 
 
 def ground():
     # Drawing ground
-    floor = arc.load_texture("floor.jpg", 0, 0, 1920, 480)
-    arc.draw_texture_rectangle(2700, 50, 600, 100, floor)
+    floor = load_texture("floor.jpg", 0, 0, 1920, 480)
+    draw_texture_rectangle(2700, 50, 600, 100, floor)
 
 
 # SCREEN ---------------------------------------------------------------------------------------------------------------
 def screen_setup():
-    arc.open_window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
-    arc.set_background_color(arc.color.SKY_BLUE)
+    open_window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+    set_background_color(color.SKY_BLUE)
 
-    arc.schedule(update_everything, 1 / 60)
+    schedule(update_everything, 1 / 60)
 
-    window = arc.get_window()
+    window = get_window()
     window.on_mouse_motion = mouse_detection
     window.on_mouse_press = button_click
     window.on_key_press = player_press
     window.on_key_release = player_release
 
     title_screen()
-    arc.run()
+    run()
 
 
 screen_setup()
