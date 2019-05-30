@@ -2,7 +2,6 @@ from arcade import *
 import random
 import math
 
-# Implement realistic gravity
 # Fix bug that makes player able to jump for extended periods of time using the platforms
 # Add "death" feature when player leaves viewport
 
@@ -53,7 +52,9 @@ onGround = False
 # Game progression variables
 upProgress = 2
 upSpeed = 0.5
-frameCount = 0
+frameCount_gameStart = 0
+frameCount_playStart = 0
+timerCount = 0
 
 # Keypress variables
 W = False
@@ -69,21 +70,23 @@ laserSpeed = [0.2]
 
 # UPDATE ---------------------------------------------------------------------------------------------------------------
 def update_everything(delta_time):
-    global upProgress, upSpeed, frameCount
+    global upProgress, upSpeed, frameCount_gameStart
     title_screen()
     transition(transition_state)
     create_platform()
     ground()
     player()
     find_player()
-    laser()
 
-    upProgress += upSpeed
+    if timerCount == 3:
+        laser()
 
-    frameCount += 1
+        if frameCount_gameStart % 500 == 0:
+            upSpeed *= 2
 
-    if frameCount % 500 == 0:
-        upSpeed *= 2
+        upProgress += upSpeed
+
+    frameCount_gameStart += 1
 
 
 # SCREEN LOGIC ---------------------------------------------------------------------------------------------------
@@ -125,23 +128,47 @@ def title_screen():
     draw_text("Restart", 3260, 192, color.WHITE, 20, font_name="Calibri", bold=True, italic=True)
 
 
+def timer():
+    global timerCount
+    one = load_texture("1.png", 0, 0, 382, 432)
+    two = load_texture("2.png", 0, 0, 377, 425)
+    three = load_texture("3.png", 0, 0, 386, 435)
+
+    if 60 <= frameCount_playStart < 120:
+        draw_texture_rectangle(2700, 400, 200, 500, three)
+        if timerCount < 1:
+            timerCount += 1
+
+    elif 120 <= frameCount_playStart < 180:
+        draw_texture_rectangle(2700, 400, 200, 500, two)
+        if timerCount < 2:
+            timerCount += 1
+
+    elif 180 <= frameCount_playStart < 240:
+        draw_texture_rectangle(2700, 400, 200, 500, one)
+        if timerCount < 3:
+            timerCount += 1
+
+
 # SCREENS/VIEWPORTS ----------------------------------------------------------------------------------------------------
 def transition(state):
-    global transition_speed, screen_tracker
+    global transition_speed, screen_tracker, frameCount_playStart
     if state:
         set_viewport(screen_tracker - 300, screen_tracker + 300, 0, 800)
         screen_tracker += transition_speed
 
         if screen_tracker == PLAY_AREA_CENTER:
+            frameCount_playStart += 1
             transition_speed = 0
-            level_progression()
+            timer()
+            if timerCount == 3:
+                level_progression()
 
 
 def level_progression():
     global lower, upper
     lower = upProgress
     upper = 800 + upProgress
-
     set_viewport(2400, 3000, lower, upper)
 
     if Player_pos[1] <= lower:
@@ -260,7 +287,8 @@ def player():
     if onPlatform is False or onGround is False:
         Player_pos[1] = Player_pos[1] - displacement
     print("onPlat:", str(onPlatform), "|", "onGround:", str(onGround), "|", "displacement:", displacement, "|",
-          "airTime:", airTime, "|", "Frame:", frameCount, "|", "upSpeed:", upSpeed, "|", "Screen:", screen_tracker)
+          "airTime:", airTime, "|", "Frame:", frameCount_playStart, "|", "upSpeed:", upSpeed, "|", "CountDown:",
+          timerCount)
 
 
 def death():
