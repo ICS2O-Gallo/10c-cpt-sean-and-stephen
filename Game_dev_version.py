@@ -20,7 +20,7 @@ title_speed = 0.2
 
 # Button variables
 button_transparency = [1, 1]
-button_pos = [300, 200, 3300, 200]
+button_pos = [300, 200, 300, 200]
 
 # Variables for transition from menu into game
 x_transition = 0
@@ -123,7 +123,7 @@ def title_screen():
         title_speed = -title_speed
 
     draw_texture_rectangle(button_pos[0], button_pos[1], 200, 100, button, 0, button_transparency[0])
-    draw_texture_rectangle(button_pos[2], button_pos[3], 200, 100, button, 0, button_transparency[1])
+    draw_texture_rectangle(3300, 200, 200, 100, button, 0, button_transparency[1])
     draw_text("Play", 280, 192, color.WHITE, 20, font_name="Calibri", bold=True, italic=True)
     draw_text("Restart", 3260, 192, color.WHITE, 20, font_name="Calibri", bold=True, italic=True)
 
@@ -216,6 +216,8 @@ def mouse_detection(x, y, dx, dy):
         button_transparency[0] = 1
         button_transparency[1] = 1
 
+    print(x, y)
+
 
 def button_click(x, y, button, modifiers):
     global button_area_1, button_area_2, transition_state, screen_tracker
@@ -286,9 +288,9 @@ def player():
         displacement = (Player_pos[1] - 125)
     if onPlatform is False or onGround is False:
         Player_pos[1] = Player_pos[1] - displacement
-    print("onPlat:", str(onPlatform), "|", "onGround:", str(onGround), "|", "displacement:", displacement, "|",
+    '''print("onPlat:", str(onPlatform), "|", "onGround:", str(onGround), "|", "displacement:", displacement, "|",
           "airTime:", airTime, "|", "Frame:", frameCount_playStart, "|", "upSpeed:", upSpeed, "|", "CountDown:",
-          timerCount)
+          timerCount)'''
 
 
 def death():
@@ -299,13 +301,19 @@ def death():
 
 
 def reset():
-    global screen_tracker
+    global screen_tracker, upProgress, frameCount_playStart, frameCount_gameStart, timerCount, x_transition, \
+        transition_state
     screen_tracker = 300
     Player_pos[0] = 2700
     Player_pos[1] = 100
-    set_viewport(0, 600, 0, 800)
     screen_tracker = 300
-
+    upProgress = 2
+    frameCount_gameStart = 0
+    frameCount_playStart = 0
+    timerCount = 0
+    x_transition = 0
+    transition_state = False
+    transition(transition_state)
 
 # LASER ----------------------------------------------------------------------------------------------------------------
 def laser():
@@ -330,7 +338,7 @@ def find_player():
 # PLATFORM / GROUND ----------------------------------------------------------------------------------------------------
 def create_platform():
     global upProgress
-    platform = load_texture("platform2.png", 0, 0, 28, 11)
+    platform = load_texture("platform2.png", 0, 0, 195, 35)
 
     for i in range(plat_quantity):
         # Creating and appending platforms coordinates and speeds to their respective lists
