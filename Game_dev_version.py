@@ -63,7 +63,7 @@ S = False
 D = False
 
 # Laser Variables
-laserAngles = [45]
+laserAngles = [90]
 laserPos_x = [2400]
 laserSpeed = [0.2]
 
@@ -78,7 +78,7 @@ def update_everything(delta_time):
     player()
     find_player()
 
-    if timerCount == 3:
+    if timerCount == 60:
         laser()
 
         if frameCount_gameStart % 500 == 0:
@@ -103,7 +103,7 @@ def title_screen():
 
     # Putting textures onto screen
     draw_texture_rectangle(300, 450, 600, 900, background)
-    draw_texture_rectangle(3300, 450, 600, 900, game_over_back)
+    draw_texture_rectangle(3900, 450, 600, 900, game_over_back)
 
     for multi in range(1, 5):
         draw_texture_rectangle(300 + 600 * multi, 450, 600, 900, background)
@@ -112,7 +112,7 @@ def title_screen():
         draw_texture_rectangle(2700, 800 * multi2 + 400, 600, 900, background)
 
     draw_texture_rectangle(315, title_y, 400, 180, title)
-    draw_texture_rectangle(3300, title_y, 400, 75, game_over)
+    draw_texture_rectangle(3900, title_y, 400, 75, game_over)
 
     title_y += title_speed
 
@@ -123,9 +123,9 @@ def title_screen():
         title_speed = -title_speed
 
     draw_texture_rectangle(button_pos[0], button_pos[1], 200, 100, button, 0, button_transparency[0])
-    draw_texture_rectangle(3300, 200, 200, 100, button, 0, button_transparency[1])
+    draw_texture_rectangle(3900, 200, 200, 100, button, 0, button_transparency[1])
     draw_text("Play", 280, 192, color.WHITE, 20, font_name="Calibri", bold=True, italic=True)
-    draw_text("Restart", 3260, 192, color.WHITE, 20, font_name="Calibri", bold=True, italic=True)
+    draw_text("Restart", 3860, 192, color.WHITE, 20, font_name="Calibri", bold=True, italic=True)
 
 
 def timer():
@@ -135,18 +135,18 @@ def timer():
     three = load_texture("Textures/3.png", 0, 0, 386, 435)
 
     if 60 <= frameCount_playStart < 120:
-        draw_texture_rectangle(2700, 400, 200, 500, three)
+        draw_texture_rectangle(2700, 400, 50 * timerCount, 60 * timerCount, three)
         if timerCount < 1:
             timerCount += 1
 
     elif 120 <= frameCount_playStart < 180:
-        draw_texture_rectangle(2700, 400, 200, 500, two)
+        draw_texture_rectangle(2700, 400, 50 * timerCount, 60 * timerCount, two)
         if timerCount < 2:
             timerCount += 1
 
     elif 180 <= frameCount_playStart < 240:
-        draw_texture_rectangle(2700, 400, 200, 500, one)
-        if timerCount < 3:
+        draw_texture_rectangle(2700, 400, 50 * timerCount, 60 * timerCount, one)
+        if timerCount < 60:
             timerCount += 1
 
 
@@ -161,7 +161,7 @@ def transition(state):
             frameCount_playStart += 1
             transition_speed = 0
             timer()
-            if timerCount == 3:
+            if timerCount == 60:
                 level_progression()
 
 
@@ -284,39 +284,41 @@ def player():
 
     # GRAVITY
     displacement = ((1 / 2) * acceleration * airTime)
-    
     if displacement > (Player_pos[1] - 125):
         displacement = (Player_pos[1] - 125)
-        
     if onPlatform is False or onGround is False:
         Player_pos[1] = Player_pos[1] - displacement
-        
     '''print("onPlat:", str(onPlatform), "|", "onGround:", str(onGround), "|", "displacement:", displacement, "|",
           "airTime:", airTime, "|", "Frame:", frameCount_playStart, "|", "upSpeed:", upSpeed, "|", "CountDown:",
           timerCount)'''
 
 
 def death():
-    global jumpSpeed, screen_tracker
-    set_viewport(3000, 3600, 0, 800)
+    global jumpSpeed, screen_tracker, laserAngles
+    set_viewport(3600, 4200, 0, 800)
     # Disables jumping back into game
     jumpSpeed = 0
 
 
 def reset():
     global screen_tracker, upProgress, frameCount_playStart, frameCount_gameStart, timerCount, x_transition, \
-        transition_state
+        transition_state, transition_speed, jumpSpeed
+
+    # resetting many things ;)
+    x_transition = 0
+    transition_state = False
     screen_tracker = 300
-    Player_pos[0] = 2700
-    Player_pos[1] = 100
-    screen_tracker = 300
+    transition_speed = 20
+
     upProgress = 2
     frameCount_gameStart = 0
     frameCount_playStart = 0
     timerCount = 0
-    x_transition = 0
-    transition_state = False
-    transition(transition_state)
+
+    jumpSpeed = 25
+
+    set_viewport(0, 600, 0, 800)
+
 
 # LASER ----------------------------------------------------------------------------------------------------------------
 def laser():
