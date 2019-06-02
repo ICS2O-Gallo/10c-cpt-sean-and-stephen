@@ -95,11 +95,11 @@ def title_screen():
 
     start_render()
     # Loading the textures for screen
-    background = load_texture("background.png", 0, 0, 320, 256)
-    title = load_texture("title_text.png", 0, 0, 1225, 459)
-    button = load_texture("label.png", 0, 36, 48, 12)
-    game_over = load_texture("game_over.png", 0, 0, 1074, 144)
-    game_over_back = load_texture("game_over_back.png", 0, 0, 320, 256)
+    background = load_texture("Textures/background.png", 0, 0, 320, 256)
+    title = load_texture("Textures/title_text.png", 0, 0, 1225, 459)
+    button = load_texture("Textures/label.png", 0, 36, 48, 12)
+    game_over = load_texture("Textures/game_over.png", 0, 0, 1074, 144)
+    game_over_back = load_texture("Textures/game_over_back.png", 0, 0, 320, 256)
 
     # Putting textures onto screen
     draw_texture_rectangle(300, 450, 600, 900, background)
@@ -130,9 +130,9 @@ def title_screen():
 
 def timer():
     global timerCount
-    one = load_texture("1.png", 0, 0, 382, 432)
-    two = load_texture("2.png", 0, 0, 377, 425)
-    three = load_texture("3.png", 0, 0, 386, 435)
+    one = load_texture("Textures/1.png", 0, 0, 382, 432)
+    two = load_texture("Textures/2.png", 0, 0, 377, 425)
+    three = load_texture("Textures/3.png", 0, 0, 386, 435)
 
     if 60 <= frameCount_playStart < 120:
         draw_texture_rectangle(2700, 400, 200, 500, three)
@@ -259,7 +259,7 @@ def player():
     airTime += 1
 
     # Drawing player
-    cube = load_texture("player.png", 0, 0, 64, 64)
+    cube = load_texture("Textures/player.png", 0, 0, 64, 64)
     draw_texture_rectangle(Player_pos[0], Player_pos[1], Player_size, Player_size, cube)
     # All collision (sides of screen, ground, platforms)
     for i in range(plat_quantity):
@@ -341,7 +341,7 @@ def find_player():
 # PLATFORM / GROUND ----------------------------------------------------------------------------------------------------
 def create_platform():
     global upProgress
-    platform = load_texture("platform2.png", 0, 0, 195, 35)
+    platform = load_texture("Textures/platform2.png", 0, 0, 195, 35)
 
     for i in range(plat_quantity):
         # Creating and appending platforms coordinates and speeds to their respective lists
@@ -371,7 +371,7 @@ def create_platform():
 
 def ground():
     # Drawing ground
-    floor = load_texture("floor.jpg", 0, 0, 1920, 480)
+    floor = load_texture("Textures/floor.jpg", 0, 0, 1920, 480)
     draw_texture_rectangle(2700, 50, 600, 100, floor)
 
 
