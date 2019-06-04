@@ -288,9 +288,9 @@ def player():
         displacement = (Player_pos[1] - 125)
     if onPlatform is False or onGround is False:
         Player_pos[1] = Player_pos[1] - displacement
-    '''print("onPlat:", str(onPlatform), "|", "onGround:", str(onGround), "|", "displacement:", displacement, "|",
+    print("onPlat:", str(onPlatform), "|", "onGround:", str(onGround), "|", "displacement:", displacement, "|",
           "airTime:", airTime, "|", "Frame:", frameCount_playStart, "|", "upSpeed:", upSpeed, "|", "CountDown:",
-          timerCount)'''
+          timerCount)
 
 
 def death():
@@ -302,7 +302,7 @@ def death():
 
 def reset():
     global screen_tracker, upProgress, frameCount_playStart, frameCount_gameStart, timerCount, x_transition, \
-        transition_state, transition_speed, jumpSpeed
+        transition_state, transition_speed, jumpSpeed, upSpeed
 
     # resetting many things ;)
     x_transition = 0
@@ -311,6 +311,7 @@ def reset():
     transition_speed = 20
 
     upProgress = 2
+    upSpeed = 0.5
     frameCount_gameStart = 0
     frameCount_playStart = 0
     timerCount = 0
