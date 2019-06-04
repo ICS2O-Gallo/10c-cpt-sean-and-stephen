@@ -14,7 +14,7 @@ SCREEN_TITLE = "Laser Platform"
 # The center x-value of the play area
 PLAY_AREA_CENTER = 2700
 
-# "Floating" title text
+# "Floating" title Textures
 title_y = 680
 title_speed = 0.2
 
@@ -222,14 +222,13 @@ def mouse_detection(x, y, dx, dy):
 def button_click(x, y, button, modifiers):
     global button_area_1, button_area_2, transition_state, screen_tracker
 
+    if not transition_state:
     # Initializing game
-    if button_area_1 and button == MOUSE_BUTTON_LEFT and screen_tracker == 300:
-        transition_state = True
-
-    # Restart logic goes here
-    elif button_area_2 and button == MOUSE_BUTTON_LEFT:
-        reset()
-        print("Pressed")
+        if button_area_1 and button == MOUSE_BUTTON_LEFT and screen_tracker == 300:
+            transition_state = True
+        elif button_area_2 and button == MOUSE_BUTTON_LEFT:
+            reset()
+            print("Pressed")
 
 
 # PLAYER ---------------------------------------------------------------------------------------------------------------
@@ -288,21 +287,22 @@ def player():
         displacement = (Player_pos[1] - 125)
     if onPlatform is False or onGround is False:
         Player_pos[1] = Player_pos[1] - displacement
-    print("onPlat:", str(onPlatform), "|", "onGround:", str(onGround), "|", "displacement:", displacement, "|",
+    '''print("onPlat:", str(onPlatform), "|", "onGround:", str(onGround), "|", "displacement:", displacement, "|",
           "airTime:", airTime, "|", "Frame:", frameCount_playStart, "|", "upSpeed:", upSpeed, "|", "CountDown:",
-          timerCount)
+          timerCount)'''
 
 
 def death():
-    global jumpSpeed, screen_tracker, laserAngles
+    global jumpSpeed, screen_tracker, laserAngles, transition_state
     set_viewport(3600, 4200, 0, 800)
     # Disables jumping back into game
     jumpSpeed = 0
+    transition_state = False
 
 
 def reset():
     global screen_tracker, upProgress, frameCount_playStart, frameCount_gameStart, timerCount, x_transition, \
-        transition_state, transition_speed, jumpSpeed, upSpeed
+        transition_state, transition_speed, jumpSpeed
 
     # resetting many things ;)
     x_transition = 0
@@ -311,7 +311,6 @@ def reset():
     transition_speed = 20
 
     upProgress = 2
-    upSpeed = 0.5
     frameCount_gameStart = 0
     frameCount_playStart = 0
     timerCount = 0
