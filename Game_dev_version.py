@@ -2,10 +2,11 @@ from arcade import *
 import random
 import math
 
-# Fix bug that makes player able to jump for extended periods of time using the platforms
+# Fix bug that makes player able to jump for extended periods of time using the
+# platforms
 # Add "death" feature when player leaves viewport
 
-# GLOBAL VARIABLES -----------------------------------------------------------------------------------------------------
+# GLOBAL VARIABLES ------------------------------------------------------------
 # Screen variables
 SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 800
