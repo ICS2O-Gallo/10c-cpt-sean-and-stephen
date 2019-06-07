@@ -45,6 +45,7 @@ jumpCap = 15
 jumpSpeed = 25
 acceleration = 1.5
 airTime = 0
+score = 0
 
 # Variables for ground/platform collision
 onPlatform = False
@@ -71,16 +72,18 @@ laserSpeed = [0.2]
 
 # UPDATE ----------------------------------------------------------------------
 def update_everything(delta_time):
-    global upProgress, upSpeed, frameCount_gameStart
+    global upProgress, upSpeed, frameCount_gameStart, score
     title_screen()
     transition(transition_state)
     create_platform()
     ground()
     player()
     find_player()
+    player_score()
 
     if timerCount == 60:
         laser()
+        score += 1
 
         if frameCount_gameStart % 500 == 0:
             upSpeed *= 2
@@ -103,6 +106,7 @@ def title_screen():
     game_over = load_texture("Textures/game_over.png", 0, 0, 1074, 144)
     game_over_back = load_texture("Textures/game_over_back.png", 0, 0, 320,
                                   256)
+    
 
     # Putting textures onto screen
     draw_texture_rectangle(300, 450, 600, 900, background)
@@ -313,6 +317,9 @@ def player():
           "upSpeed:", upSpeed, "|", "CountDown:",
           timerCount)'''
 
+def player_score():
+    global upProgress
+    draw_text(f"Score: {score}", 2420, upProgress + 750, color.BLACK, 20)
 
 def death():
     global jumpSpeed, screen_tracker, laserAngles, transition_state
@@ -325,7 +332,7 @@ def death():
 def reset():
     global screen_tracker, upProgress, frameCount_playStart, \
         frameCount_gameStart, timerCount, x_transition, \
-        transition_state, transition_speed, jumpSpeed
+        transition_state, transition_speed, jumpSpeed, upSpeed, score
 
     # resetting many things ;)
     x_transition = 0
@@ -333,11 +340,12 @@ def reset():
     screen_tracker = 300
     transition_speed = 20
 
-    upProgress = 2
+    upProgress = 0
     frameCount_gameStart = 0
     frameCount_playStart = 0
     timerCount = 0
 
+    score = 0
     jumpSpeed = 25
 
     set_viewport(0, 600, 0, 800)
