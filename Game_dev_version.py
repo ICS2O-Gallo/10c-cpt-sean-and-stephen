@@ -92,7 +92,7 @@ def update_everything(delta_time):
 
 # SCREEN LOGIC ----------------------------------------------------------------
 def title_screen():
-    global button_pos, button_transparency, title_y, title_speed, x_transition\
+    global button_pos, button_transparency, title_y, title_speed, x_transition \
         , screen_tracker, transition_state
 
     start_render()
@@ -213,7 +213,7 @@ def player_release(symbol, modifiers):
 
 
 def mouse_detection(x, y, dx, dy):
-    global button_pos, button_transparency, button_area_1, button_area_2,\
+    global button_pos, button_transparency, button_area_1, button_area_2, \
         Player_pos
 
     # Detects when mouse is over the button
@@ -248,7 +248,7 @@ def button_click(x, y, button, modifiers):
 # PLAYER ----------------------------------------------------------------------
 def player():
     global W, A, S, D
-    global screen_tracker, jumpDuration, onPlatform, onGround, airTime,\
+    global screen_tracker, jumpDuration, onPlatform, onGround, airTime, \
         displacement
 
     # MOVEMENT
@@ -300,10 +300,10 @@ def player():
 
     # GRAVITY
     displacement = ((1 / 2) * acceleration * airTime)
-    
+
     if displacement > (Player_pos[1] - 125):
         displacement = (Player_pos[1] - 125)
-        
+
     if onPlatform is False or onGround is False:
         Player_pos[1] = Player_pos[1] - displacement
 
@@ -323,7 +323,7 @@ def death():
 
 
 def reset():
-    global screen_tracker, upProgress, frameCount_playStart,\
+    global screen_tracker, upProgress, frameCount_playStart, \
         frameCount_gameStart, timerCount, x_transition, \
         transition_state, transition_speed, jumpSpeed
 
@@ -422,4 +422,3 @@ def screen_setup():
 
 
 screen_setup()
-
