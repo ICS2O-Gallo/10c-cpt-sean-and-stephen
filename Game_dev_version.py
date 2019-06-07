@@ -75,7 +75,8 @@ def update_everything(delta_time):
     global upProgress, upSpeed, frameCount_gameStart, score
     title_screen()
     transition(transition_state)
-    create_platform()
+    if screen_tracker == PLAY_AREA_CENTER:
+        create_platform()
     ground()
     player()
     find_player()
@@ -106,7 +107,6 @@ def title_screen():
     game_over = load_texture("Textures/game_over.png", 0, 0, 1074, 144)
     game_over_back = load_texture("Textures/game_over_back.png", 0, 0, 320,
                                   256)
-    
 
     # Putting textures onto screen
     draw_texture_rectangle(300, 450, 600, 900, background)
@@ -233,8 +233,6 @@ def mouse_detection(x, y, dx, dy):
         button_transparency[0] = 1
         button_transparency[1] = 1
 
-    print(x, y)
-
 
 def button_click(x, y, button, modifiers):
     global button_area_1, button_area_2, transition_state, screen_tracker
@@ -281,26 +279,28 @@ def player():
     draw_texture_rectangle(Player_pos[0], Player_pos[1], Player_size,
                            Player_size, cube)
     # All collision (sides of screen, ground, platforms)
-    for i in range(plat_quantity):
-        if Player_pos[1] <= 125:
-            Player_pos[1] = 125
-            onGround = True
+    if screen_tracker == PLAY_AREA_CENTER:
+        for i in range(plat_quantity):
+            if Player_pos[1] <= 125:
+                Player_pos[1] = 125
+                onGround = True
 
-        if Player_pos[0] <= 2425:
-            Player_pos[0] = 2425
+            if Player_pos[0] <= 2425:
+                Player_pos[0] = 2425
 
-        if Player_pos[0] >= 2975:
-            Player_pos[0] = 2975
+            if Player_pos[0] >= 2975:
+                Player_pos[0] = 2975
 
-        # The range of a platform that a player can "land" on
-        platform_x = plat_list_x[i] - 90 < Player_pos[0] < plat_list_x[i] + 90
-        platform_y = plat_list_y[i] - 50 <= Player_pos[1] \
-                     <= plat_list_y[i] + 37
+            # The range of a platform that a player can "land" on
+            platform_x = plat_list_x[i] - 90 < Player_pos[0] < plat_list_x[
+                i] + 90
+            platform_y = plat_list_y[i] - 50 <= Player_pos[1] \
+                         <= plat_list_y[i] + 37
 
-        if platform_x and platform_y:
-            Player_pos[1] = plat_list_y[i] + 37
-            Player_pos[0] += plat_speed_list[i]
-            onPlatform = True
+            if platform_x and platform_y:
+                Player_pos[1] = plat_list_y[i] + 37
+                Player_pos[0] += plat_speed_list[i]
+                onPlatform = True
 
     # GRAVITY
     displacement = ((1 / 2) * acceleration * airTime)
@@ -311,15 +311,16 @@ def player():
     if onPlatform is False or onGround is False:
         Player_pos[1] = Player_pos[1] - displacement
 
-    '''print("onPlat:", str(onPlatform), "|", "onGround:", str(onGround), "|", 
-    "displacement:", displacement, "|",
-          "airTime:", airTime, "|", "Frame:", frameCount_playStart, "|", 
-          "upSpeed:", upSpeed, "|", "CountDown:",
-          timerCount)'''
+    print("onPlat:", str(onPlatform), "|", "onGround:", str(onGround), "|",
+          "displacement:", displacement, "|",
+          "airTime:", airTime, "|", "Frame:", frameCount_playStart, "|",
+          "upSpeed:", upSpeed, "|", "upProgress:",
+          upProgress)
+
 
 def player_score():
-    global upProgress
     draw_text(f"Score: {score}", 2420, upProgress + 750, color.BLACK, 20)
+
 
 def death():
     global jumpSpeed, screen_tracker, laserAngles, transition_state
@@ -330,9 +331,9 @@ def death():
 
 
 def reset():
-    global screen_tracker, upProgress, frameCount_playStart, \
+    global screen_tracker, upProgress, upSpeed, frameCount_playStart, \
         frameCount_gameStart, timerCount, x_transition, \
-        transition_state, transition_speed, jumpSpeed, upSpeed, score
+        transition_state, transition_speed, jumpSpeed, score
 
     # resetting many things ;)
     x_transition = 0
@@ -340,13 +341,15 @@ def reset():
     screen_tracker = 300
     transition_speed = 20
 
-    upProgress = 0
+    score = 0
+    upSpeed = 2
+    upProgress = 2
     frameCount_gameStart = 0
     frameCount_playStart = 0
     timerCount = 0
 
-    score = 0
     jumpSpeed = 25
+    destroy_platforms()
 
     set_viewport(0, 600, 0, 800)
 
@@ -383,8 +386,6 @@ def create_platform():
         plat_list_y.append(i * 300 + 400)
         plat_list_x.append(random.randint(2500, 2900))
         plat_speed_list.append(random.choice([-2, 2, -3, 3]))
-        draw_texture_rectangle(plat_list_x[i], plat_list_y[i], 150, 30,
-                               platform)
 
         bot = upProgress
         top = 800 + upProgress
@@ -404,6 +405,15 @@ def create_platform():
 
         draw_texture_rectangle(plat_list_x[i], plat_list_y[i], 150, 30,
                                platform)
+
+
+def destroy_platforms():
+    for i in range(len(plat_list_y)):
+        try:
+            plat_list_y.pop(i)
+
+        except IndexError:
+            pass
 
 
 def ground():
