@@ -1,6 +1,7 @@
-from arcade import *
-import random
 import math
+import random
+
+from arcade import *
 
 # Fix bug that makes player able to jump for extended periods of time using the
 # platforms
@@ -76,7 +77,7 @@ def update_everything(delta_time):
     title_screen()
     transition(transition_state)
     if screen_tracker == PLAY_AREA_CENTER:
-        create_platform()
+        move_platform()
     ground()
     player()
     find_player()
@@ -244,7 +245,6 @@ def button_click(x, y, button, modifiers):
             transition_state = True
         elif button_area_2 and button == MOUSE_BUTTON_LEFT:
             reset()
-            print("Pressed")
 
 
 # PLAYER ----------------------------------------------------------------------
@@ -317,11 +317,11 @@ def player():
     if onPlatform is False or onGround is False:
         Player_pos[1] = Player_pos[1] - displacement
 
-    print("onPlat:", str(onPlatform), "|", "onGround:", str(onGround), "|",
+    '''print("onPlat:", str(onPlatform), "|", "onGround:", str(onGround), "|",
           "displacement:", displacement, "|",
           "airTime:", airTime, "|", "Frame:", frameCount_playStart, "|",
           "upSpeed:", upSpeed, "|", "upProgress:",
-          upProgress)
+          upProgress)'''
 
 
 def player_score():
@@ -348,15 +348,17 @@ def reset():
     transition_speed = 20
 
     score = 0
-    upSpeed = 2
+    upSpeed = 0.5
     upProgress = 2
     frameCount_gameStart = 0
     frameCount_playStart = 0
     timerCount = 0
 
     jumpSpeed = 25
-    destroy_platforms()
+    # destroy_platforms()
 
+    remove_platform()
+    create_platform()
     set_viewport(0, 600, 0, 800)
 
 
@@ -384,22 +386,20 @@ def find_player():
 # PLATFORM / GROUND -----------------------------------------------------------
 def create_platform():
     global upProgress
-    platform = load_texture("Textures/platform2.png", 0, 0, 195, 35)
 
     for i in range(plat_quantity):
         # Creating and appending platforms coordinates and speeds to their
         # respective lists
+        print("Creating...")
+        print(i)
         plat_list_y.append(i * 300 + 400)
         plat_list_x.append(random.randint(2500, 2900))
         plat_speed_list.append(random.choice([-2, 2, -3, 3]))
 
-        bot = upProgress
-        top = 800 + upProgress
 
-        if plat_list_y[i] < bot:
-            plat_list_y[i] = top
-            plat_list_x[i] = random.randint(2500, 2900)
-
+def move_platform():
+    platform = load_texture("Textures/platform2.png", 0, 0, 195, 35)
+    for i in range(plat_quantity):
         # Moving the platforms
         plat_list_x[i] += plat_speed_list[i]
 
@@ -409,17 +409,23 @@ def create_platform():
         elif plat_list_x[i] < 2475:
             plat_speed_list[i] = -plat_speed_list[i]
 
+        bot = upProgress
+        top = 800 + upProgress
+
+        if plat_list_y[i] < bot:
+            plat_list_y[i] = top
+            plat_list_x[i] = random.randint(2500, 2900)
+
         draw_texture_rectangle(plat_list_x[i], plat_list_y[i], 150, 30,
                                platform)
 
 
-def destroy_platforms():
-    for i in range(len(plat_list_y)):
-        try:
-            plat_list_y.pop(i)
-
-        except IndexError:
-            pass
+def remove_platform():
+    for i in range(plat_quantity - 1, -1, -1):
+        print("Removing...")
+        print(i)
+        plat_list_y.pop(i)
+        plat_list_x.pop(i)
 
 
 def ground():
@@ -434,6 +440,7 @@ def screen_setup():
     set_background_color(color.SKY_BLUE)
 
     schedule(update_everything, 1 / 60)
+    create_platform()
 
     window = get_window()
     window.on_mouse_motion = mouse_detection
