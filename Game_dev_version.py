@@ -295,18 +295,18 @@ def player():
             platform_x = plat_list_x[i] - 90 < Player_pos[0] < plat_list_x[
                 i] + 90
             platform_y_top = plat_list_y[i] <= Player_pos[1] \
-                             <= plat_list_y[i] + 40
+                             <= plat_list_y[i] + 38
 
             platform_y_bottom = plat_list_y[i] >= Player_pos[1] \
-                                >= plat_list_y[i] - 40
+                                >= plat_list_y[i] - 38
 
             if platform_x and platform_y_top:
-                Player_pos[1] = plat_list_y[i] + 40
+                Player_pos[1] = plat_list_y[i] + 38
                 Player_pos[0] += plat_speed_list[i]
                 onPlatform = True
 
             elif platform_x and platform_y_bottom:
-                Player_pos[1] = plat_list_y[i] - 40
+                Player_pos[1] = plat_list_y[i] - 38
 
     # GRAVITY
     displacement = ((1 / 2) * acceleration * airTime)
