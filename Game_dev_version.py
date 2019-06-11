@@ -1,6 +1,5 @@
 import math
 import random
-
 from arcade import *
 
 # Fix bug that makes player able to jump for extended periods of time using the
@@ -21,8 +20,8 @@ title_y = 680
 title_speed = 0.2
 
 # Button variables
-button_transparency = [1, 1]
-button_pos = [300, 200, 300, 200]
+button_transparency = [1, 1, 1]
+button_pos = [300, 200, 300, 200, 300, 100]
 
 # Variables for transition from menu into game
 x_transition = 0
@@ -65,38 +64,49 @@ A = False
 S = False
 D = False
 
-# Laser Variables
-laserAngles = [90]
-laserPos_x = [2400]
-laserSpeed = [0.2]
+# Rocket variables
+laserX = 3001
+laser_speed = -5
+launchState = -1
+frequency = 100
+rocket_y = 5
+rocket_speed = 5
 
 
 # UPDATE ----------------------------------------------------------------------
 def update_everything(delta_time):
-    global upProgress, upSpeed, frameCount_gameStart, score
-    title_screen()
+    global upProgress, upSpeed, frameCount_gameStart, score, rocket_y
+    screens()
     transition(transition_state)
     if screen_tracker == PLAY_AREA_CENTER:
         move_platform()
     ground()
     player()
-    find_player()
     player_score()
 
     if timerCount == 60:
-        laser()
+        draw_laser()
+        laser_movement()
+
+        if launchState == 1:
+            rocket_y += rocket_speed
+            shoot_rocket(rocket_y)
+
+        else:
+            rocket_y = -10
+
         score += 1
 
         if frameCount_gameStart % 500 == 0:
-            upSpeed *= 2
+            upSpeed *= 1.5
 
         upProgress += upSpeed
 
     frameCount_gameStart += 1
 
 
-# SCREEN LOGIC ----------------------------------------------------------------
-def title_screen():
+# SCREENS ---------------------------------------------------------------------
+def screens():
     global button_pos, button_transparency, title_y, title_speed, x_transition \
         , screen_tracker, transition_state
 
@@ -132,9 +142,13 @@ def title_screen():
 
     draw_texture_rectangle(button_pos[0], button_pos[1], 200, 100, button, 0,
                            button_transparency[0])
+    draw_texture_rectangle(button_pos[4], button_pos[5], 200, 100, button, 0,
+                           button_transparency[2])
     draw_texture_rectangle(3900, 200, 200, 100, button, 0,
                            button_transparency[1])
     draw_text("Play", 280, 192, color.WHITE, 20, font_name="Calibri",
+              bold=True, italic=True)
+    draw_text("Instructions", 237, 92, color.WHITE, 20, font_name="Calibri",
               bold=True, italic=True)
     draw_text("Restart", 3860, 192, color.WHITE, 20, font_name="Calibri",
               bold=True, italic=True)
@@ -194,57 +208,67 @@ def level_progression():
 def player_press(symbol, modifiers):
     global W, A, D
 
-    if symbol == key.D:
+    if symbol == key.D or symbol == key.RIGHT:
         D = True
 
-    elif symbol == key.A:
+    elif symbol == key.A or symbol == key.LEFT:
         A = True
 
-    elif symbol == key.W:
+    elif symbol == key.W or symbol == key.UP:
         W = True
 
 
 def player_release(symbol, modifiers):
     global W, A, D
 
-    if symbol == key.D:
+    if symbol == key.D or symbol == key.RIGHT:
         D = False
 
-    elif symbol == key.A:
+    elif symbol == key.A or symbol == key.LEFT:
         A = False
 
-    elif symbol == key.W:
+    elif symbol == key.W or symbol == key.UP:
         W = False
 
 
 def mouse_detection(x, y, dx, dy):
-    global button_pos, button_transparency, button_area_1, button_area_2, \
-        Player_pos
+    global button_pos, button_transparency, start_button_area, \
+        restart_button_area, instruct_button_area, Player_pos
 
     # Detects when mouse is over the button
-    button_area_1 = button_pos[0] - 100 <= x <= button_pos[0] + 100 and \
-                    button_pos[1] - 50 <= y <= button_pos[1] + 50
-    button_area_2 = button_pos[2] - 100 <= x <= button_pos[2] + 100 and \
-                    button_pos[3] - 50 <= y <= button_pos[3] + 50
+    start_button_area = button_pos[0] - 100 <= x <= button_pos[0] + 100 and \
+                        button_pos[1] - 50 <= y <= button_pos[1] + 50
+    restart_button_area = button_pos[2] - 100 <= x <= button_pos[2] + 100 and \
+                          button_pos[3] - 50 <= y <= button_pos[3] + 50
+    instruct_button_area = button_pos[4] - 100 <= x <= button_pos[4] + 100 \
+                           and button_pos[5] - 50 <= y <= button_pos[5] + 50
 
-    if button_area_1 or button_area_2:
-        button_transparency[0] = 0.5
-        button_transparency[1] = 0.5
-    else:
-        button_transparency[0] = 1
-        button_transparency[1] = 1
+    # List for "for" loop
+    button_area_list = [start_button_area, restart_button_area,
+                        instruct_button_area]
+
+    for i in range(len(button_transparency)):
+        if button_area_list[i]:
+            button_transparency[i] = 0.5
+
+        else:
+            button_transparency[i] = 1
 
 
 def button_click(x, y, button, modifiers):
-    global button_area_1, button_area_2, transition_state, screen_tracker
+    global start_button_area, restart_button_area, instruct_button_area, transition_state, \
+        screen_tracker
 
     if not transition_state:
         # Initializing game
-        if button_area_1 and button == MOUSE_BUTTON_LEFT and \
+        if start_button_area and button == MOUSE_BUTTON_LEFT and \
                 screen_tracker == 300:
             transition_state = True
-        elif button_area_2 and button == MOUSE_BUTTON_LEFT:
+        elif restart_button_area and button == MOUSE_BUTTON_LEFT:
             reset()
+        elif instruct_button_area:
+            pass
+            # instruction_screen()
 
 
 # PLAYER ----------------------------------------------------------------------
@@ -362,25 +386,35 @@ def reset():
     set_viewport(0, 600, 0, 800)
 
 
-# LASER -----------------------------------------------------------------------
-def laser():
-    if screen_tracker == 2700:
-        for i in range(len(laserPos_x)):
-            draw_rectangle_filled(laserPos_x[i], upProgress, 2000, 1,
-                                  color.RED, laserAngles[i])
+# ROCKET ----------------------------------------------------------------------
+def draw_laser():
+    global lower, upper
+    warning = load_texture("Textures/warning.png", 0, 0, 400, 400)
+
+    draw_line(laserX, lower, laserX, upper, color.LASER_LEMON, 2)
+
+    if launchState == 1 and frameCount_playStart % 7 != 0:
+        draw_texture_rectangle(laserX, lower + 40, 100, 100, warning)
 
 
-def find_player():
-    for i in range(len(laserAngles)):
-        root_y = Player_pos[1] - upProgress
-        root_x = Player_pos[0] - 2400
-        true_angle = math.degrees(math.atan(root_y / root_x))
+def shoot_rocket(rocket_y):
+    global lower
+    rocket = load_texture("Textures/missile.png", 0, 0, 253, 178)
+    draw_texture_rectangle(laserX, rocket_y, 100, 50, rocket,
+                           90)
 
-        if laserAngles[i] > true_angle:
-            laserAngles[i] -= laserSpeed[i]
 
-        if laserAngles[i] < true_angle:
-            laserAngles[i] += laserSpeed[i]
+def laser_movement():
+    global laserX, laser_speed, launchState
+    laserX += laser_speed
+    if laserX >= PLAY_AREA_CENTER + 300:
+        laser_speed = -laser_speed
+
+    elif laserX <= PLAY_AREA_CENTER - 300:
+        laser_speed = -laser_speed
+
+    if frameCount_playStart % frequency == 0:
+        launchState = -launchState
 
 
 # PLATFORM / GROUND -----------------------------------------------------------
@@ -392,7 +426,7 @@ def create_platform():
         # respective lists
         print("Creating...")
         print(i)
-        plat_list_y.append(i * 300 + 400)
+        plat_list_y.append(i * 300)
         plat_list_x.append(random.randint(2500, 2900))
         plat_speed_list.append(random.choice([-2, 2, -3, 3]))
 
@@ -448,7 +482,7 @@ def screen_setup():
     window.on_key_press = player_press
     window.on_key_release = player_release
 
-    title_screen()
+    screens()
     run()
 
 
