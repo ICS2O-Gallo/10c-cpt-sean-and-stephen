@@ -9,14 +9,22 @@ SCH = 800
 SCW = 1000
 SCT = "Jumping with gravity - test"
 
-object_radius = 10
+object_radius = 50
 
+# y - axis movement
 # Object starts lower than "initial height" to ensure velocity is not 0
 initial_y = 400
 object_y = initial_y - 1
+
+# The jump cap is slightly less than the initial value
+# because the detection rate for arcade is only 60/second
+# If jump cap = initial_y, the distance between initial_y and object_y may
+# become negative, resulting in an error
+jumpCap = initial_y - 2
+
+# x - axis movement
 object_x = SCW / 2
 object_speed = 5
-jumpCap = initial_y - 5
 
 # Acceleration of gravity
 g = 1
@@ -68,8 +76,6 @@ def jump():
         onGround = False
         inAir = True
 
-    print("On ground: {0} | In air: {1}".format(onGround, inAir))
-
     # When a jump is called, the object moves up by twice the velocity in order
     # to counteract the "regular" gravity acting on it downwards.
     if U:
@@ -101,13 +107,13 @@ def left_right_move():
 # Key press / release functions
 def keypress(symbol, mod):
     global U, L, R
-    if symbol == ac.key.UP and onGround:
+    if (symbol == ac.key.UP or symbol == ac.key.W) and onGround:
         U = True
 
-    if symbol == ac.key.LEFT:
+    if symbol == ac.key.LEFT or symbol == ac.key.A:
         L = True
 
-    if symbol == ac.key.RIGHT:
+    if symbol == ac.key.RIGHT or symbol == ac.key.D:
         R = True
 
 
@@ -115,10 +121,10 @@ def keyrelease(symbol, mod):
     # Only left and right movement is detected as upwards control is
     # controlled in the jump() function
     global L, R
-    if symbol == ac.key.LEFT:
+    if symbol == ac.key.LEFT or symbol == ac.key.A:
         L = False
 
-    if symbol == ac.key.RIGHT:
+    if symbol == ac.key.RIGHT or symbol == ac.key.D:
         R = False
 
 
