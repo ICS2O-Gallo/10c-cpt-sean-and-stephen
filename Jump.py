@@ -6,13 +6,13 @@ Air resistance does not exist in this simulation
 """
 # Window information
 SCH = 800
-SCW = 600
+SCW = 1000
 SCT = "Jumping with gravity - test"
 
 object_radius = 10
 
 # Object starts lower than "initial height" to ensure velocity is not 0
-initial_y = 790
+initial_y = 400
 object_y = initial_y - 1
 object_x = SCW / 2
 object_speed = 5
@@ -89,6 +89,13 @@ def left_right_move():
 
     if R:
         object_x += object_speed
+
+    # Object does not leave the screen (left and right)
+    if object_x - object_radius <= 0:
+        object_x = object_radius
+
+    if object_x + object_radius >= SCW:
+        object_x = SCW - object_radius
 
 
 # Key press / release functions
