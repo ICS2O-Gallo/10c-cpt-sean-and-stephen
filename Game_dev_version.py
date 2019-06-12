@@ -41,9 +41,9 @@ Player_speed = 5
 Player_size = 50
 Player_score = 0
 jumpDuration = 0
-jumpCap = 15
+jumpTime = 15
 jumpSpeed = 25
-acceleration = 1.5
+grav = 1
 airTime = 0
 score = 0
 
@@ -274,8 +274,8 @@ def button_click(x, y, button, modifiers):
 # PLAYER ----------------------------------------------------------------------
 def player():
     global W, A, S, D
-    global screen_tracker, jumpDuration, onPlatform, onGround, airTime, \
-        displacement
+    global screen_tracker, jumpDuration, onPlatform, onGround, airTime
+
 
     # MOVEMENT
     if D is True:
@@ -332,14 +332,19 @@ def player():
             elif platform_x and platform_y_bottom:
                 Player_pos[1] = plat_list_y[i] - 38
 
-    # GRAVITY
-    displacement = ((1 / 2) * acceleration * airTime)
+def gravity():
+    global grav, Player_pos, jumpSpeed
+    initial_y = jumpSpeed + Player_pos[1]
+    Player_pos[1] = initial_y + Player_pos[1] - 1
+    jumpCap = jumpSpeed + Player_pos[1] - 2
 
-    if displacement > (Player_pos[1] - 125):
-        displacement = (Player_pos[1] - 125)
+    def get_dist(y):
+        return initial_y - y
+
+    return(2 * grav * get_dist(Player_pos[1])) ** 0.5
 
     if onPlatform is False or onGround is False:
-        Player_pos[1] = Player_pos[1] - displacement
+        Player_pos[1] -=
 
     '''print("onPlat:", str(onPlatform), "|", "onGround:", str(onGround), "|",
           "displacement:", displacement, "|",
