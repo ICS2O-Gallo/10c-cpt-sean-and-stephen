@@ -22,6 +22,7 @@ title_speed = 0.2
 # Button variables
 button_transparency = [1, 1, 1]
 button_pos = [300, 200, 300, 200, 300, 100]
+instruction_press = False
 
 # Variables for transition from menu into game
 x_transition = 0
@@ -41,9 +42,9 @@ Player_speed = 5
 Player_size = 50
 Player_score = 0
 jumpDuration = 0
-jumpTime = 15
+jumpCap = 15
 jumpSpeed = 25
-grav = 1
+acceleration = 1.75
 airTime = 0
 score = 0
 
@@ -80,6 +81,7 @@ def update_everything(delta_time):
     transition(transition_state)
     if screen_tracker == PLAY_AREA_CENTER:
         move_platform()
+
     ground()
     player()
     player_score()
@@ -108,7 +110,7 @@ def update_everything(delta_time):
 # SCREENS ---------------------------------------------------------------------
 def screens():
     global button_pos, button_transparency, title_y, title_speed, x_transition \
-        , screen_tracker, transition_state
+        , screen_tracker, transition_state, instruction_press
 
     start_render()
     # Loading the textures for screen
@@ -152,6 +154,16 @@ def screens():
               bold=True, italic=True)
     draw_text("Restart", 3860, 192, color.WHITE, 20, font_name="Calibri",
               bold=True, italic=True)
+    # Instructions Screen
+    if instruction_press:
+        set_viewport(0, 600, 900, 1700)
+        instruct_back = load_texture("Textures/space.jpg", 0, 0, 320, 480)
+        draw_texture_rectangle(300, 1300, 600, 800, instruct_back)
+        draw_text("1. Press W to jump.", 50, 1600, color.WHITE, 25, font_name="Calibri")
+        draw_text("2. Press A to go left, D to go right.", 50, 1450, color.WHITE, 25, font_name="Calibri")
+        draw_text("3. You can jump through the platforms.", 50, 1300, color.WHITE, 25, font_name="Calibri")
+        draw_text("4. Stay in the screen to survive and", 50, 1150, color.WHITE, 25, font_name="Calibri")
+        draw_text("improve your score!", 50, 1115, color.WHITE, 25, font_name="Calibri")
 
 
 def timer():
@@ -257,7 +269,7 @@ def mouse_detection(x, y, dx, dy):
 
 def button_click(x, y, button, modifiers):
     global start_button_area, restart_button_area, instruct_button_area, transition_state, \
-        screen_tracker
+        screen_tracker, instruction_press
 
     if not transition_state:
         # Initializing game
@@ -266,16 +278,14 @@ def button_click(x, y, button, modifiers):
             transition_state = True
         elif restart_button_area and button == MOUSE_BUTTON_LEFT:
             reset()
-        elif instruct_button_area:
-            pass
-            # instruction_screen()
+        elif instruct_button_area and button == MOUSE_BUTTON_LEFT:
+            instruction_press = True
 
 
 # PLAYER ----------------------------------------------------------------------
 def player():
     global W, A, S, D
-    global screen_tracker, jumpDuration, onPlatform, onGround, airTime
-
+    global screen_tracker, jumpDuration, onPlatform, onGround, airTime, acceleration
 
     # MOVEMENT
     if D is True:
@@ -331,27 +341,14 @@ def player():
 
             elif platform_x and platform_y_bottom:
                 Player_pos[1] = plat_list_y[i] - 38
+    # GRAVITY
+    displacement = (1 / 2) * acceleration * airTime
 
-def gravity():
-    global grav, Player_pos, jumpSpeed
-    initial_y = jumpSpeed + Player_pos[1]
-    Player_pos[1] = initial_y + Player_pos[1] - 1
-    jumpCap = jumpSpeed + Player_pos[1] - 2
+    if not onPlatform or not onGround:
+        Player_pos[1] -= displacement
 
-    def get_dist(y):
-        return initial_y - y
-
-    return(2 * grav * get_dist(Player_pos[1])) ** 0.5
-
-    if onPlatform is False or onGround is False:
-        Player_pos[1] -=
-
-    '''print("onPlat:", str(onPlatform), "|", "onGround:", str(onGround), "|",
-          "displacement:", displacement, "|",
-          "airTime:", airTime, "|", "Frame:", frameCount_playStart, "|",
-          "upSpeed:", upSpeed, "|", "upProgress:",
-          upProgress)'''
-
+    if Player_pos[1] - displacement <= 125:
+        Player_pos[1] = 125
 
 def player_score():
     draw_text(f"Score: {score}", 2420, upProgress + 750, color.BLACK, 20)
