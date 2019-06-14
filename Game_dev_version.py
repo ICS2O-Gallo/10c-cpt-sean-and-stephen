@@ -1,4 +1,3 @@
-import math
 import random
 from arcade import *
 
@@ -20,8 +19,8 @@ title_y = 680
 title_speed = 0.2
 
 # Button variables
-button_transparency = [1, 1, 1]
-button_pos = [300, 200, 300, 200, 300, 100]
+button_transparency = [1, 1, 1, 1]
+button_pos = [300, 200, 3900, 200, 300, 100, 300, 1000]
 instruction_press = False
 
 # Variables for transition from menu into game
@@ -29,6 +28,7 @@ x_transition = 0
 transition_state = False
 screen_tracker = 300
 transition_speed = 20
+inInstruct = False
 
 # Platform variables
 plat_speed_list = []
@@ -146,24 +146,33 @@ def screens():
                            button_transparency[0])
     draw_texture_rectangle(button_pos[4], button_pos[5], 200, 100, button, 0,
                            button_transparency[2])
-    draw_texture_rectangle(3900, 200, 200, 100, button, 0,
+    draw_texture_rectangle(button_pos[2], button_pos[3], 200, 100, button, 0,
                            button_transparency[1])
+    draw_texture_rectangle(button_pos[4], button_pos[5], 200, 100, button, 0,
+                           button_transparency[3])
+
     draw_text("Play", 280, 192, color.WHITE, 20, font_name="Calibri",
               bold=True, italic=True)
     draw_text("Instructions", 237, 92, color.WHITE, 20, font_name="Calibri",
               bold=True, italic=True)
     draw_text("Restart", 3860, 192, color.WHITE, 20, font_name="Calibri",
               bold=True, italic=True)
+
     # Instructions Screen
     if instruction_press:
         set_viewport(0, 600, 900, 1700)
         instruct_back = load_texture("Textures/space.jpg", 0, 0, 320, 480)
         draw_texture_rectangle(300, 1300, 600, 800, instruct_back)
-        draw_text("1. Press W to jump.", 50, 1600, color.WHITE, 25, font_name="Calibri")
-        draw_text("2. Press A to go left, D to go right.", 50, 1450, color.WHITE, 25, font_name="Calibri")
-        draw_text("3. You can jump through the platforms.", 50, 1300, color.WHITE, 25, font_name="Calibri")
-        draw_text("4. Stay in the screen to survive and", 50, 1150, color.WHITE, 25, font_name="Calibri")
-        draw_text("improve your score!", 50, 1115, color.WHITE, 25, font_name="Calibri")
+        draw_text("1. Press W to jump.", 50, 1600, color.WHITE, 25,
+                  font_name="Calibri")
+        draw_text("2. Press A to go left, D to go right.", 50, 1450,
+                  color.WHITE, 25, font_name="Calibri")
+        draw_text("3. You can jump through the platforms.", 50, 1300,
+                  color.WHITE, 25, font_name="Calibri")
+        draw_text("4. Stay in the screen to survive and", 50, 1150,
+                  color.WHITE, 25, font_name="Calibri")
+        draw_text("improve your score!", 50, 1115, color.WHITE, 25,
+                  font_name="Calibri")
 
 
 def timer():
@@ -245,7 +254,7 @@ def player_release(symbol, modifiers):
 
 def mouse_detection(x, y, dx, dy):
     global button_pos, button_transparency, start_button_area, \
-        restart_button_area, instruct_button_area, Player_pos
+        restart_button_area, instruct_button_area, Player_pos, inInstruct
 
     # Detects when mouse is over the button
     start_button_area = button_pos[0] - 100 <= x <= button_pos[0] + 100 and \
@@ -254,12 +263,14 @@ def mouse_detection(x, y, dx, dy):
                           button_pos[3] - 50 <= y <= button_pos[3] + 50
     instruct_button_area = button_pos[4] - 100 <= x <= button_pos[4] + 100 \
                            and button_pos[5] - 50 <= y <= button_pos[5] + 50
+    back_button_area = button_pos[5] - 100 <= x <= button_pos[5] + 100 \
+                       and button_pos[6] - 50 <= y <= button_pos[6] + 50
 
     # List for "for" loop
     button_area_list = [start_button_area, restart_button_area,
                         instruct_button_area]
 
-    for i in range(len(button_transparency)):
+    for i in range(len(button_area_list) - 1):
         if button_area_list[i]:
             button_transparency[i] = 0.5
 
@@ -350,12 +361,13 @@ def player():
     if Player_pos[1] - displacement <= 125:
         Player_pos[1] = 125
 
+
 def player_score():
     draw_text(f"Score: {score}", 2420, upProgress + 750, color.BLACK, 20)
 
 
 def death():
-    global jumpSpeed, screen_tracker, laserAngles, transition_state
+    global jumpSpeed, screen_tracker, transition_state
     set_viewport(3600, 4200, 0, 800)
     # Disables jumping back into game
     jumpSpeed = 0
