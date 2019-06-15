@@ -89,7 +89,6 @@ def update_everything(delta_time):
     player_score()
 
     if timerCount == 60:
-        score += 1
 
         if frameCount_gameStart % 500 == 0:
             upSpeed *= 1.5
