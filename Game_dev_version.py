@@ -1,15 +1,11 @@
 import random
 from arcade import *
 
-# Fix bug that makes player able to jump for extended periods of time using the
-# platforms
-# Add "death" feature when player leaves viewport
-
 # GLOBAL VARIABLES ------------------------------------------------------------
 # Screen variables
 SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 800
-SCREEN_TITLE = "Laser Platform"
+SCREEN_TITLE = "Laser & Platforms"
 
 # The center x-value of the play area
 PLAY_AREA_CENTER = 2700
@@ -19,16 +15,29 @@ title_y = 680
 title_speed = 0.2
 
 # Button variables
-button_transparency = [1, 1, 1, 1]
-button_pos = [300, 200, 3900, 200, 300, 100, 300, 1000]
-instruction_press = False
+button_transparency = [255, 255, 255, 255]
+button_pos = [
+    [300, 200],
+    [3900, 200],
+    [300, 100],
+    [500, 1650]
+]
+# The mouse click positions are different from the draw positions.
+# The mouse "lives" inside 0 <= x <= 600 and 0 <= y <= 800
+mouse_button_pos = [
+    [300, 200],
+    [300, 200],
+    [300, 100],
+    [500, 750]
+]
+print(mouse_button_pos)
 
 # Variables for transition from menu into game
 x_transition = 0
 transition_state = False
 screen_tracker = 300
 transition_speed = 20
-inInstruct = False
+instruction_press = -1
 
 # Platform variables
 plat_speed_list = []
@@ -65,19 +74,12 @@ A = False
 S = False
 D = False
 
-# Rocket variables
-laserX = 3001
-laser_speed = -5
-launchState = -1
-frequency = 100
-rocket_y = 5
-rocket_speed = 5
-
 
 # UPDATE ----------------------------------------------------------------------
 def update_everything(delta_time):
-    global upProgress, upSpeed, frameCount_gameStart, score, rocket_y
+    global upProgress, upSpeed, frameCount_gameStart, score
     screens()
+    instruction_toggle(instruction_press)
     transition(transition_state)
     if screen_tracker == PLAY_AREA_CENTER:
         move_platform()
@@ -87,16 +89,6 @@ def update_everything(delta_time):
     player_score()
 
     if timerCount == 60:
-        draw_laser()
-        laser_movement()
-
-        if launchState == 1:
-            rocket_y += rocket_speed
-            shoot_rocket(rocket_y)
-
-        else:
-            rocket_y = -10
-
         score += 1
 
         if frameCount_gameStart % 500 == 0:
@@ -106,11 +98,13 @@ def update_everything(delta_time):
 
     frameCount_gameStart += 1
 
+    print(instruction_press)
+
 
 # SCREENS ---------------------------------------------------------------------
 def screens():
     global button_pos, button_transparency, title_y, title_speed, x_transition \
-        , screen_tracker, transition_state, instruction_press
+        , screen_tracker, transition_state, instruction_press, inInstruct
 
     start_render()
     # Loading the textures for screen
@@ -120,6 +114,20 @@ def screens():
     game_over = load_texture("Textures/game_over.png", 0, 0, 1074, 144)
     game_over_back = load_texture("Textures/game_over_back.png", 0, 0, 320,
                                   256)
+
+    # Instructions
+    instruct_back = load_texture("Textures/space.jpg", 0, 0, 320, 480)
+    draw_texture_rectangle(300, 1300, 600, 800, instruct_back)
+    draw_text("1. Press W to jump.", 50, 1600, color.WHITE, 25,
+              font_name="Calibri")
+    draw_text("2. Press A to go left, D to go right.", 50, 1450,
+              color.WHITE, 25, font_name="Calibri")
+    draw_text("3. You can jump through the platforms.", 50, 1300,
+              color.WHITE, 25, font_name="Calibri")
+    draw_text("4. Stay in the screen to survive and", 50, 1150,
+              color.WHITE, 25, font_name="Calibri")
+    draw_text("improve your score!", 50, 1115, color.WHITE, 25,
+              font_name="Calibri")
 
     # Putting textures onto screen
     draw_texture_rectangle(300, 450, 600, 900, background)
@@ -142,39 +150,42 @@ def screens():
     elif title_y <= 670:
         title_speed = -title_speed
 
-    draw_texture_rectangle(button_pos[0], button_pos[1], 200, 100, button, 0,
+    # Drawing the buttons. Can't use a "for" loop. It won't work
+    draw_texture_rectangle(button_pos[0][0],
+                           button_pos[0][1], 200, 100, button, 0,
                            button_transparency[0])
-    draw_texture_rectangle(button_pos[4], button_pos[5], 200, 100, button, 0,
-                           button_transparency[2])
-    draw_texture_rectangle(button_pos[2], button_pos[3], 200, 100, button, 0,
+    draw_texture_rectangle(button_pos[1][0],
+                           button_pos[1][1], 200, 100, button, 0,
                            button_transparency[1])
-    draw_texture_rectangle(button_pos[4], button_pos[5], 200, 100, button, 0,
+    draw_texture_rectangle(button_pos[2][0],
+                           button_pos[2][1], 200, 100, button, 0,
+                           button_transparency[2])
+    draw_texture_rectangle(button_pos[3][0],
+                           button_pos[3][1], 200, 100, button, 0,
                            button_transparency[3])
 
-    draw_text("Play", 280, 192, color.WHITE, 20, font_name="Calibri",
+    draw_text("Play", 280, 192, color.WHITE, 20, font_name="calibri",
               bold=True, italic=True)
-    draw_text("Instructions", 237, 92, color.WHITE, 20, font_name="Calibri",
+    draw_text("Instructions", 237, 92, color.WHITE, 20,
+              font_name="calibri",
               bold=True, italic=True)
-    draw_text("Restart", 3860, 192, color.WHITE, 20, font_name="Calibri",
+    draw_text("Restart", 3860, 192, color.WHITE, 20, font_name="calibri",
+              bold=True, italic=True)
+    draw_text("Back", 478, 1640, color.WHITE, 20, font_name="calibri",
               bold=True, italic=True)
 
-    # Instructions Screen
-    if instruction_press:
+
+# Instructions Screen
+def instruction_toggle(state):
+    if state == 1:
         set_viewport(0, 600, 900, 1700)
-        instruct_back = load_texture("Textures/space.jpg", 0, 0, 320, 480)
-        draw_texture_rectangle(300, 1300, 600, 800, instruct_back)
-        draw_text("1. Press W to jump.", 50, 1600, color.WHITE, 25,
-                  font_name="Calibri")
-        draw_text("2. Press A to go left, D to go right.", 50, 1450,
-                  color.WHITE, 25, font_name="Calibri")
-        draw_text("3. You can jump through the platforms.", 50, 1300,
-                  color.WHITE, 25, font_name="Calibri")
-        draw_text("4. Stay in the screen to survive and", 50, 1150,
-                  color.WHITE, 25, font_name="Calibri")
-        draw_text("improve your score!", 50, 1115, color.WHITE, 25,
-                  font_name="Calibri")
+
+    else:
+        pass
+    # Find out how to
 
 
+# Countdown timer in game
 def timer():
     global timerCount
     one = load_texture("Textures/1.png", 0, 0, 382, 432)
@@ -248,55 +259,86 @@ def player_release(symbol, modifiers):
     elif symbol == key.A or symbol == key.LEFT:
         A = False
 
-    elif symbol == key.W or symbol == key.UP:
-        W = False
-
 
 def mouse_detection(x, y, dx, dy):
     global button_pos, button_transparency, start_button_area, \
-        restart_button_area, instruct_button_area, Player_pos, inInstruct
+        restart_button_area, instruct_button_area, Player_pos, inInstruct, \
+        button_area_list
 
-    # Detects when mouse is over the button
-    start_button_area = button_pos[0] - 100 <= x <= button_pos[0] + 100 and \
-                        button_pos[1] - 50 <= y <= button_pos[1] + 50
-    restart_button_area = button_pos[2] - 100 <= x <= button_pos[2] + 100 and \
-                          button_pos[3] - 50 <= y <= button_pos[3] + 50
-    instruct_button_area = button_pos[4] - 100 <= x <= button_pos[4] + 100 \
-                           and button_pos[5] - 50 <= y <= button_pos[5] + 50
-    back_button_area = button_pos[5] - 100 <= x <= button_pos[5] + 100 \
-                       and button_pos[6] - 50 <= y <= button_pos[6] + 50
+    # Detects when mouse is over the button.
+    # Can't use a "for" loop. Mouse detection won't work
+    start_button_area = mouse_button_pos[0][0] - 100 <= x <= \
+                        mouse_button_pos[0][0] + 100 and \
+                        mouse_button_pos[0][1] - 50 <= y <= \
+                        mouse_button_pos[0][1] + 50
 
-    # List for "for" loop
+    restart_button_area = mouse_button_pos[1][0] - 100 <= x <= \
+                          mouse_button_pos[1][0] + 100 and \
+                          mouse_button_pos[1][1] - 50 <= y <= \
+                          mouse_button_pos[1][1] + 50
+
+    instruct_button_area = mouse_button_pos[2][0] - 100 <= x <= \
+                           mouse_button_pos[2][0] + 100 and \
+                           mouse_button_pos[2][1] - 50 <= y <= \
+                           mouse_button_pos[2][1] + 50
+
+    back_button_area = mouse_button_pos[3][0] - 100 <= x <= \
+                       mouse_button_pos[3][0] + 100 and \
+                       mouse_button_pos[3][1] - 50 <= y <= \
+                       mouse_button_pos[3][1] + 50
+
+    # List for button areas
     button_area_list = [start_button_area, restart_button_area,
-                        instruct_button_area]
+                        instruct_button_area, back_button_area]
 
-    for i in range(len(button_area_list) - 1):
-        if button_area_list[i]:
-            button_transparency[i] = 0.5
+    # Change in transparency when moused over
+    if button_area_list[0]:
+        button_transparency[0] = 127.5
 
-        else:
-            button_transparency[i] = 1
+    else:
+        button_transparency[0] = 255
+    if button_area_list[1]:
+        button_transparency[1] = 127.5
+
+    else:
+        button_transparency[1] = 255
+    if button_area_list[2]:
+        button_transparency[2] = 127.5
+
+    else:
+        button_transparency[2] = 255
+    if button_area_list[3]:
+        button_transparency[3] = 127.5
+
+    else:
+        button_transparency[3] = 255
 
 
 def button_click(x, y, button, modifiers):
-    global start_button_area, restart_button_area, instruct_button_area, transition_state, \
-        screen_tracker, instruction_press
+    global button_area_list, screen_tracker, instruction_press, \
+        transition_state
 
     if not transition_state:
-        # Initializing game
-        if start_button_area and button == MOUSE_BUTTON_LEFT and \
-                screen_tracker == 300:
+        # Start button clicked
+        if button_area_list[0] and button == MOUSE_BUTTON_LEFT:
             transition_state = True
-        elif restart_button_area and button == MOUSE_BUTTON_LEFT:
+
+        # Reset button clicked
+        if button_area_list[1] and button == MOUSE_BUTTON_LEFT:
             reset()
-        elif instruct_button_area and button == MOUSE_BUTTON_LEFT:
+
+        if button_area_list[2] and button == MOUSE_BUTTON_LEFT:
             instruction_press = True
 
+        if button_area_list[3] and button == MOUSE_BUTTON_LEFT:
+            instruction_press = -instruction_press
 
-# PLAYER ----------------------------------------------------------------------
+
+# PLAYER ------------------------------------------------------------------
 def player():
     global W, A, S, D
-    global screen_tracker, jumpDuration, onPlatform, onGround, airTime, acceleration
+    global screen_tracker, jumpDuration, onPlatform, onGround, airTime, \
+        acceleration
 
     # MOVEMENT
     if D is True:
@@ -329,6 +371,7 @@ def player():
             if Player_pos[1] <= 125:
                 Player_pos[1] = 125
                 onGround = True
+                W = False
 
             if Player_pos[0] <= 2425:
                 Player_pos[0] = 2425
@@ -349,6 +392,7 @@ def player():
                 Player_pos[1] = plat_list_y[i] + 38
                 Player_pos[0] += plat_speed_list[i]
                 onPlatform = True
+                W = False
 
             elif platform_x and platform_y_bottom:
                 Player_pos[1] = plat_list_y[i] - 38
@@ -379,7 +423,7 @@ def reset():
         frameCount_gameStart, timerCount, x_transition, \
         transition_state, transition_speed, jumpSpeed, score
 
-    # resetting many things ;)
+    # resetting
     x_transition = 0
     transition_state = False
     screen_tracker = 300
@@ -400,37 +444,6 @@ def reset():
     set_viewport(0, 600, 0, 800)
 
 
-# ROCKET ----------------------------------------------------------------------
-def draw_laser():
-    global lower, upper
-    warning = load_texture("Textures/warning.png", 0, 0, 400, 400)
-
-    draw_line(laserX, lower, laserX, upper, color.LASER_LEMON, 2)
-
-    if launchState == 1 and frameCount_playStart % 7 != 0:
-        draw_texture_rectangle(laserX, lower + 40, 100, 100, warning)
-
-
-def shoot_rocket(rocket_y):
-    global lower
-    rocket = load_texture("Textures/missile.png", 0, 0, 253, 178)
-    draw_texture_rectangle(laserX, rocket_y, 100, 50, rocket,
-                           90)
-
-
-def laser_movement():
-    global laserX, laser_speed, launchState
-    laserX += laser_speed
-    if laserX >= PLAY_AREA_CENTER + 300:
-        laser_speed = -laser_speed
-
-    elif laserX <= PLAY_AREA_CENTER - 300:
-        laser_speed = -laser_speed
-
-    if frameCount_playStart % frequency == 0:
-        launchState = -launchState
-
-
 # PLATFORM / GROUND -----------------------------------------------------------
 def create_platform():
     global upProgress
@@ -438,8 +451,6 @@ def create_platform():
     for i in range(plat_quantity):
         # Creating and appending platforms coordinates and speeds to their
         # respective lists
-        print("Creating...")
-        print(i)
         plat_list_y.append(i * 300)
         plat_list_x.append(random.randint(2500, 2900))
         plat_speed_list.append(random.choice([-2, 2, -3, 3]))
@@ -470,8 +481,6 @@ def move_platform():
 
 def remove_platform():
     for i in range(plat_quantity - 1, -1, -1):
-        print("Removing...")
-        print(i)
         plat_list_y.pop(i)
         plat_list_x.pop(i)
 
@@ -484,7 +493,7 @@ def ground():
 
 # SCREEN ----------------------------------------------------------------------
 def screen_setup():
-    open_window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+    open_window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE, antialiasing=False)
     set_background_color(color.SKY_BLUE)
 
     schedule(update_everything, 1 / 60)
