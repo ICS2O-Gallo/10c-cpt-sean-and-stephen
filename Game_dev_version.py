@@ -221,6 +221,7 @@ def transition(state):
         if screen_tracker == PLAY_AREA_CENTER:
             frameCount_playStart += 1
             transition_speed = 0
+            score += 1
             timer()
             if timerCount == 60:
                 level_progression()
@@ -415,6 +416,7 @@ def death():
     set_viewport(3600, 4200, 0, 800)
     # Disables jumping back into game
     jumpSpeed = 0
+    screen_tracker = 300
     transition_state = False
 
 
