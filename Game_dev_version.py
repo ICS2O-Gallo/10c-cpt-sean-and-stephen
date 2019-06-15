@@ -213,7 +213,7 @@ def timer():
 
 # SCREENS/VIEWPORTS -----------------------------------------------------------
 def transition(state):
-    global transition_speed, screen_tracker, frameCount_playStart
+    global transition_speed, screen_tracker, frameCount_playStart, score
     if state:
         set_viewport(screen_tracker - 300, screen_tracker + 300, 0, 800)
         screen_tracker += transition_speed
@@ -416,7 +416,6 @@ def death():
     set_viewport(3600, 4200, 0, 800)
     # Disables jumping back into game
     jumpSpeed = 0
-    screen_tracker = 300
     transition_state = False
 
 
