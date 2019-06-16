@@ -33,7 +33,7 @@ mouse_button_pos = [
 
 # Variables for transition from menu into game
 x_transition = 0
-transition_state = False
+transition_state = -1
 screen_tracker = 300
 transition_speed = 20
 instruction_press = -1
@@ -177,9 +177,8 @@ def screens():
 # Instructions Screen
 def instruction_toggle(state):
     if state == 1:
-        set_viewport(0, 600, 900, 1700)
-        print("Instruct: set_viewport(0, 600, 900, 1700)")
-
+        # set_viewport(0, 600, 900, 1700)
+        pass
     else:
         reset()
 
@@ -213,12 +212,11 @@ def timer():
 # SCREENS/VIEWPORTS -----------------------------------------------------------
 def transition(state):
     global transition_speed, screen_tracker, frameCount_playStart
-    if state:
+    if state == 1:
         set_viewport(screen_tracker - 300, screen_tracker + 300, 0, 800)
-        print(
-            "Transition: set_viewport(screen_tracker - 300, screen_tracker + 300, 0, 800)")
 
         screen_tracker += transition_speed
+        print(screen_tracker, state)
 
         if screen_tracker == PLAY_AREA_CENTER:
             frameCount_playStart += 1
@@ -233,7 +231,6 @@ def level_progression():
     lower = upProgress
     upper = 800 + upProgress
     set_viewport(2400, 3000, lower, upper)
-    print("Level progress: set_viewport(2400, 3000, lower, upper)")
 
     if Player_pos[1] <= lower:
         death()
@@ -309,22 +306,21 @@ def mouse_detection(x, y, dx, dy):
     # Change to 50% transparency when moused over
     if button_area_list[0]:
         button_transparency[0] = 127.5
-
     else:
         button_transparency[0] = 255
+
     if button_area_list[1]:
         button_transparency[1] = 127.5
-
     else:
         button_transparency[1] = 255
+
     if button_area_list[2]:
         button_transparency[2] = 127.5
-
     else:
         button_transparency[2] = 255
+
     if button_area_list[3]:
         button_transparency[3] = 127.5
-
     else:
         button_transparency[3] = 255
 
@@ -333,21 +329,20 @@ def button_click(x, y, button, modifiers):
     global button_area_list, screen_tracker, instruction_press, \
         transition_state
 
-    if not transition_state:
-        # Start button clicked
-        if button_area_list[0] and button == MOUSE_BUTTON_LEFT:
-            transition_state = True
+    # Start button clicked
+    if button_area_list[0] and button == MOUSE_BUTTON_LEFT:
+        transition_state = -transition_state
 
-        # Reset button clicked
-        if button_area_list[1] and button == MOUSE_BUTTON_LEFT:
-            reset()
+    # Reset button clicked
+    if button_area_list[1] and button == MOUSE_BUTTON_LEFT:
+        reset()
 
-        if button_area_list[2] and button == MOUSE_BUTTON_LEFT:
-            instruction_press = True
+    if button_area_list[2] and button == MOUSE_BUTTON_LEFT:
+        instruction_press = True
 
-        if button_area_list[3] and button == MOUSE_BUTTON_LEFT:
-            # Toggling between -1 and 1
-            instruction_press = -instruction_press
+    if button_area_list[3] and button == MOUSE_BUTTON_LEFT:
+        # Toggling between -1 and 1
+        instruction_press = -instruction_press
 
 
 # PLAYER ------------------------------------------------------------------
@@ -438,20 +433,19 @@ def player_score():
 
 def death():
     global jumpSpeed, transition_state
-    set_viewport(3600, 4200, 0, 800)
-    print("Death: set_viewport(3600, 4200, 0, 800)")
+    # set_viewport(3600, 4200, 0, 800)
     # Disables jumping back into game
     jumpSpeed = 0
-    transition_state = False
+    transition_state = -transition_state
 
 
 def reset():
-    global screen_tracker, upProgress, upSpeed, frameCount_playStart, \
-        frameCount_gameStart, x_transition, transition_state, transition_speed, jumpSpeed, score
+    global screen_tracker, upProgress, upSpeed, frameCount_playStart
+    global frameCount_gameStart, x_transition, transition_state
+    global transition_speed, jumpSpeed, score
 
     # resetting
     x_transition = 0
-    transition_state = False
     screen_tracker = 300
     transition_speed = 20
 
@@ -464,8 +458,7 @@ def reset():
 
     remove_platform()
     create_platform()
-    set_viewport(0, 600, 0, 800)
-    print("Restart: set_viewport(0, 600, 0, 800)")
+    # set_viewport(0, 600, 0, 800)
 
 
 # PLATFORM / GROUND -----------------------------------------------------------
