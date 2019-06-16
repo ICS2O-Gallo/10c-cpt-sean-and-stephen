@@ -177,7 +177,7 @@ def screens():
 # Instructions Screen
 def instruction_toggle(state):
     if state == 1:
-        # set_viewport(0, 600, 900, 1700)
+        set_viewport(0, 600, 900, 1700)
         pass
     else:
         reset()
@@ -433,7 +433,7 @@ def player_score():
 
 def death():
     global jumpSpeed, transition_state
-    # set_viewport(3600, 4200, 0, 800)
+    set_viewport(3600, 4200, 0, 800)
     # Disables jumping back into game
     jumpSpeed = 0
     transition_state = -transition_state
@@ -458,7 +458,7 @@ def reset():
 
     remove_platform()
     create_platform()
-    # set_viewport(0, 600, 0, 800)
+    set_viewport(0, 600, 0, 800)
 
 
 # PLATFORM / GROUND -----------------------------------------------------------
