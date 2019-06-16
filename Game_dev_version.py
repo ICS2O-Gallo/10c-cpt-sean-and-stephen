@@ -89,7 +89,8 @@ def update_everything(delta_time):
     player_score()
 
     if timerCount == 60:
-
+        score += 1
+        
         if frameCount_gameStart % 500 == 0:
             upSpeed *= 1.5
 
@@ -212,7 +213,7 @@ def timer():
 
 # SCREENS/VIEWPORTS -----------------------------------------------------------
 def transition(state):
-    global transition_speed, screen_tracker, frameCount_playStart, score
+    global transition_speed, screen_tracker, frameCount_playStart
     if state:
         set_viewport(screen_tracker - 300, screen_tracker + 300, 0, 800)
         screen_tracker += transition_speed
@@ -220,7 +221,6 @@ def transition(state):
         if screen_tracker == PLAY_AREA_CENTER:
             frameCount_playStart += 1
             transition_speed = 0
-            score += 1
             timer()
             if timerCount == 60:
                 level_progression()
@@ -411,17 +411,17 @@ def player_score():
 
 
 def death():
-    global jumpSpeed, screen_tracker, transition_state
+    global jumpSpeed, transition_state
     set_viewport(3600, 4200, 0, 800)
     # Disables jumping back into game
     jumpSpeed = 0
     transition_state = False
+    timerCount = 0
 
 
 def reset():
     global screen_tracker, upProgress, upSpeed, frameCount_playStart, \
-        frameCount_gameStart, timerCount, x_transition, \
-        transition_state, transition_speed, jumpSpeed, score
+        frameCount_gameStart, x_transition, transition_state, transition_speed, jumpSpeed, score
 
     # resetting
     x_transition = 0
@@ -434,8 +434,6 @@ def reset():
     upProgress = 2
     frameCount_gameStart = 0
     frameCount_playStart = 0
-    timerCount = 0
-
     jumpSpeed = 25
     # destroy_platforms()
 
