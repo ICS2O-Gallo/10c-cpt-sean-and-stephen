@@ -33,7 +33,7 @@ mouse_button_pos = [
 
 # Variables for transition from menu into game
 x_transition = 0
-transition_state = -1
+transition_state = False
 screen_tracker = 300
 transition_speed = 20
 instruction_press = -1
@@ -78,8 +78,7 @@ D = False
 def update_everything(delta_time):
     global upProgress, upSpeed, frameCount_gameStart, score
     screens()
-    instruction_toggle(instruction_press)
-    transition(transition_state)
+    transition()
 
     if screen_tracker == PLAY_AREA_CENTER:
         move_platform()
@@ -97,6 +96,7 @@ def update_everything(delta_time):
         upProgress += upSpeed
 
     frameCount_gameStart += 1
+
     print(transition_state)
 
 
@@ -175,12 +175,8 @@ def screens():
 
 
 # Instructions Screen
-def instruction_toggle(state):
-    if state == 1:
-        set_viewport(0, 600, 900, 1700)
-        pass
-    else:
-        reset()
+def instruction_screen():
+    set_viewport(0, 600, 900, 1700)
 
 
 # Countdown timer in game
@@ -210,13 +206,12 @@ def timer():
 
 
 # SCREENS/VIEWPORTS -----------------------------------------------------------
-def transition(state):
+def transition():
     global transition_speed, screen_tracker, frameCount_playStart
-    if state == 1:
+    if transition_state:
         set_viewport(screen_tracker - 300, screen_tracker + 300, 0, 800)
 
         screen_tracker += transition_speed
-        print(screen_tracker, state)
 
         if screen_tracker == PLAY_AREA_CENTER:
             frameCount_playStart += 1
@@ -330,19 +325,19 @@ def button_click(x, y, button, modifiers):
         transition_state
 
     # Start button clicked
-    if button_area_list[0] and button == MOUSE_BUTTON_LEFT:
-        transition_state = -transition_state
+    if button_area_list[0] and button == MOUSE_BUTTON_LEFT and \
+            screen_tracker == 300:
+        transition_state = True
 
     # Reset button clicked
-    if button_area_list[1] and button == MOUSE_BUTTON_LEFT:
+    elif button_area_list[1] and button == MOUSE_BUTTON_LEFT:
         reset()
 
-    if button_area_list[2] and button == MOUSE_BUTTON_LEFT:
-        instruction_press = True
+    elif button_area_list[2] and button == MOUSE_BUTTON_LEFT:
+        instruction_screen()
 
-    if button_area_list[3] and button == MOUSE_BUTTON_LEFT:
-        # Toggling between -1 and 1
-        instruction_press = -instruction_press
+    elif button_area_list[3] and button == MOUSE_BUTTON_LEFT:
+        reset()
 
 
 # PLAYER ------------------------------------------------------------------
@@ -436,7 +431,7 @@ def death():
     set_viewport(3600, 4200, 0, 800)
     # Disables jumping back into game
     jumpSpeed = 0
-    transition_state = -transition_state
+    transition_state = False
 
 
 def reset():
