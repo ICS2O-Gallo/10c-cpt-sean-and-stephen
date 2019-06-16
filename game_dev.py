@@ -20,7 +20,7 @@ title_y = 680
 title_speed = 0.2
 
 # Button variables
-button_transparency = [1, 1, 1, 1]
+button_transparency = [255, 255, 255, 255]
 button_pos = [300, 200, 300, 200, 300, 100, 300, 100]
 instruction_press = False
 
@@ -80,6 +80,7 @@ def update_everything(delta_time):
     player_score()
 
     if timerCount == 60:
+        score += 1
 
         if frameCount_gameStart % 500 == 0:
             upSpeed *= 1.5
@@ -87,7 +88,6 @@ def update_everything(delta_time):
         upProgress += upSpeed
 
     frameCount_gameStart += 1
-    print(screen_tracker)
 
 # SCREENS ---------------------------------------------------------------------
 def screens():
@@ -179,7 +179,7 @@ def timer():
 
 # SCREENS/VIEWPORTS -----------------------------------------------------------
 def transition(state):
-    global transition_speed, screen_tracker, frameCount_playStart, game_state, score
+    global transition_speed, screen_tracker, frameCount_playStart, game_state
     if state:
         set_viewport(screen_tracker - 300, screen_tracker + 300, 0, 800)
         screen_tracker += transition_speed
@@ -187,7 +187,6 @@ def transition(state):
         if screen_tracker == PLAY_AREA_CENTER:
             frameCount_playStart += 1
             transition_speed = 0
-            score += 1
             timer()
             if timerCount == 60:
                 level_progression()
@@ -339,24 +338,22 @@ def player():
         Player_pos[1] = 125
 
 def player_score():
-    global frameCount_playStart, game_state, score
-
     draw_text(f"Score: {score}", 2420, upProgress + 750, color.BLACK, 20)
 
 
 def death():
-    global jumpSpeed, screen_tracker, laserAngles, transition_state, instruction_press, game_state, screen_tracker
+    global jumpSpeed, screen_tracker, laserAngles, transition_state, instruction_press, timerCount
     set_viewport(3600, 4200, 0, 800)
     # Disables jumping back into game
     jumpSpeed = 0
     transition_state = False
-    game_state = False
+    timerCount = 0
     
 
 
 def reset():
     global screen_tracker, upProgress, upSpeed, frameCount_playStart, \
-        frameCount_gameStart, timerCount, x_transition, \
+        frameCount_gameStart, x_transition, screen_tracker, 
         transition_state, transition_speed, jumpSpeed, score
 
     # resetting many things ;)
@@ -368,8 +365,8 @@ def reset():
     upProgress = 2
     frameCount_gameStart = 0
     frameCount_playStart = 0
-    timerCount = 0
     jumpSpeed = 25
+    screen_tracker = 300
     # destroy_platforms()
 
     remove_platform()
