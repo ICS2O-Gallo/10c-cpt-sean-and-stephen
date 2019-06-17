@@ -2,7 +2,7 @@
 ICS 2O1 Game for CPT Assignment - Sean and Stephen
 
 ## Game Information
-Lasers and Platforms is a platformer game where the player tries to continuously reach the next platform while avoiding the increasingly rapid border closing from underneath. In addition, the player must dodge vertical lasers from the bottom of the screen. The score is accumulated by the frames passed after the countdown into the game.
+Lasers and Platforms is a platformer game where the player tries to continuously reach the next platform while avoiding the increasingly rapid border closing from underneath. In addition, the player must dodge vertical lasers from the bottom of the screen which will slowly eat away at your health. The score is accumulated by the frames passed after the countdown into the game.
 
 ## Goal
 The goal of this platformer game is to reach the highest score possible as it is endlessly spawning platforms and increasing the speed of the border.
