@@ -1,5 +1,11 @@
-import random
 from arcade import *
+
+"""
+An arcade platforming game
+
+- Stephen Lee, Sean Xie
+
+"""
 
 # GLOBAL VARIABLES ------------------------------------------------------------
 # Screen variables
@@ -109,8 +115,6 @@ def update_everything(delta_time):
 
     frameCount_gameStart += 1
 
-    print(transition_state)
-
 
 # SCREENS ---------------------------------------------------------------------
 def screens():
@@ -144,12 +148,14 @@ def screens():
     draw_texture_rectangle(300, 450, 600, 900, background)
     draw_texture_rectangle(3900, 450, 600, 900, game_over_back)
 
+    # Looping background textures during game play
     for multi in range(1, 5):
         draw_texture_rectangle(300 + 600 * multi, 450, 600, 900, background)
 
     for multi2 in range(1, 10):
         draw_texture_rectangle(2700, 800 * multi2 + 400, 600, 900, background)
 
+    # The "hovering" effect for the title and game over text
     draw_texture_rectangle(315, title_y, 400, 180, title)
     draw_texture_rectangle(3900, title_y, 400, 75, game_over)
 
@@ -185,7 +191,7 @@ def screens():
     draw_text("Back", 478, 1640, color.WHITE, 20, font_name="calibri",
               bold=True, italic=True)
 
-    # Final Sore
+    # Final Score
     draw_text(f"FINAL SCORE: {score}", 3800, 300, color.WHITE, 25,
               font_name="calibri")
 
@@ -239,6 +245,7 @@ def transition():
                 level_progression()
 
 
+# Making the viewport move up as game progresses
 def level_progression():
     global lower, upper
     lower = upProgress
@@ -338,6 +345,7 @@ def mouse_detection(x, y, dx, dy):
         button_transparency[3] = 255
 
 
+# Detect when a button is clicked
 def button_click(x, y, button, modifiers):
     global button_area_list, instruction_press, transition_state, \
         in_instruct_screen
@@ -389,6 +397,7 @@ def player():
         onGround = False
         airTime = -1
 
+    # The amount of time not spent on platform our ground
     airTime += 1
 
     # Drawing player
@@ -409,7 +418,7 @@ def player():
             if Player_pos[0] >= 2975:
                 Player_pos[0] = 2975
 
-            # The range of a platform that a player can "land" on
+            # The range of a platform that a player can "touch"
             platform_x = (
                     plat_list_x[i] - 90 <
                     Player_pos[0]
@@ -428,18 +437,23 @@ def player():
                     >= plat_list_y[i] - 38
             )
 
+            # When player is on a platform,
+            # they gain the x-value of the platform
+            # "W" is also released to complete a full jump
             if platform_x and platform_y_top:
                 Player_pos[1] = plat_list_y[i] + 38
                 Player_pos[0] += plat_speed_list[i]
                 onPlatform = True
                 W = False
 
+            # Hitting bottom of platform
             elif platform_x and platform_y_bottom:
-                Player_pos[1] = plat_list_y[i] - 38
+                Player_pos[1] = plat_list_y[i] - 50
     # GRAVITY
     # Modified displacement equation to fit game
     displacement = (1 / 2) * acceleration * airTime
 
+    # Player falls onto platform and ground
     if not onPlatform or not onGround:
         Player_pos[1] -= displacement
 
@@ -447,10 +461,12 @@ def player():
         Player_pos[1] = 125
 
 
+# Score on death screen
 def player_score():
     draw_text(f"Score: {score}", 2420, upProgress + 750, color.BLACK, 20)
 
 
+# Logic for player life system
 def player_life():
     draw_rectangle_outline(PLAY_AREA_CENTER,
                            upProgress + 10, 500, 10,
@@ -459,10 +475,12 @@ def player_life():
     draw_line(2455, upProgress + 10, 2455 + life, upProgress + 10, color.RED,
               5)
 
+    # Death by laser
     if life <= 0:
         death()
 
 
+# Function for dying in game
 def death():
     global jumpSpeed, transition_state, screen_tracker, timerCount
     set_viewport(3600, 4200, 0, 800)
@@ -474,6 +492,7 @@ def death():
     timerCount = 0
 
 
+# Resetting all game variables for new game
 def reset():
     global screen_tracker, upProgress, upSpeed, frameCount_playStart
     global frameCount_gameStart, transition_speed, jumpSpeed, score, life
@@ -507,21 +526,25 @@ def laser():
         global life
         draw_line(laser_x, upProgress, laser_x, upProgress + 800, color.RED, 4)
 
+        # Collision with player
         if laser_x - 5 <= Player_pos[0] <= laser_x + 5:
             life -= 10
 
+    # How long the laser has been firing
     laser_fire_timer += 1
     if laser_fire_timer <= laser_frequency:
         fire_laser()
         currentlyFiring = True
 
     else:
+        # A pause timer to ensure that the laser is not constantly active
         laser_wait_timer += 1
         if laser_wait_timer == laser_frequency:
             laser_wait_timer = 0
             laser_fire_timer = 0
             currentlyFiring = False
 
+    # Laser does not leave play area
     laser_x += laser_speed
 
     if laser_x >= 3000:
@@ -550,6 +573,7 @@ def move_platform():
     plat = load_texture("Textures/platform2.png", 0, 0, 195, 35)
     for i in range(plat_quantity):
         # Moving the platforms
+        # They don't leave the play area
         plat_list_x[i] += plat_speed_list[i]
 
         if plat_list_x[i] > 2925:
@@ -561,6 +585,8 @@ def move_platform():
         bot = upProgress
         top = 800 + upProgress
 
+        # If a platform moves out of the screen, move it to the top
+        # This method is used to avoid unneeded platforms
         if plat_list_y[i] < bot:
             plat_list_y[i] = top
             plat_list_x[i] = random.randint(2500, 2900)
@@ -569,6 +595,8 @@ def move_platform():
                                plat)
 
 
+# When a player dies, the platforms are removed
+# Later, they are created again through create_platform()
 def remove_platform():
     for i in range(plat_quantity - 1, -1, -1):
         plat_list_y.pop(i)
@@ -582,7 +610,8 @@ def ground():
 
 
 # SCREEN ----------------------------------------------------------------------
-def screen_setup():
+# Setting up the window
+def window_setup():
     open_window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
     set_background_color(color.SKY_BLUE)
 
@@ -599,4 +628,6 @@ def screen_setup():
     run()
 
 
-screen_setup()
+# Don't really know what this is for but it helps
+if __name__ == '__main__':
+    window_setup()
