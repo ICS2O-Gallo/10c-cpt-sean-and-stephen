@@ -107,7 +107,7 @@ def screens():
 
     start_render()
     # Loading the textures for screen
-    background = load_texture("Textures/background.png", 0, 0, 320, 256)
+    background = load_texture("Textures/background2.png", 0, 0, 2053, 1366)
     title = load_texture("Textures/title_text.png", 0, 0, 1225, 459)
     button = load_texture("Textures/label.png", 0, 36, 48, 12)
     game_over = load_texture("Textures/game_over.png", 0, 0, 1074, 144)
@@ -173,6 +173,8 @@ def screens():
     draw_text("Back", 478, 1640, color.WHITE, 20, font_name="calibri",
               bold=True, italic=True)
 
+    # Final Sore
+    draw_text(f"FINAL SCORE: {score}", 3800, 300, color.WHITE, 25, font_name="calibri")
 
 # Instructions Screen
 def instruction_screen():
@@ -420,6 +422,7 @@ def player():
             elif platform_x and platform_y_bottom:
                 Player_pos[1] = plat_list_y[i] - 38
     # GRAVITY
+    # Modified displacement equation to fit game
     displacement = (1 / 2) * acceleration * airTime
 
     if not onPlatform or not onGround:
@@ -434,13 +437,14 @@ def player_score():
 
 
 def death():
-    global jumpSpeed, transition_state, screen_tracker
+    global jumpSpeed, transition_state, screen_tracker, timerCount
     set_viewport(3600, 4200, 0, 800)
     # Disables jumping back into game
     jumpSpeed = 0
     transition_state = False
     screen_tracker += 600
-
+    # Stop score increase
+    timerCount = 0
 
 def reset():
     global screen_tracker, upProgress, upSpeed, frameCount_playStart
@@ -509,7 +513,7 @@ def ground():
     floor = load_texture("Textures/floor.jpg", 0, 0, 1920, 480)
     draw_texture_rectangle(2700, 50, 600, 100, floor)
 
-
+    
 # SCREEN ----------------------------------------------------------------------
 def screen_setup():
     open_window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
