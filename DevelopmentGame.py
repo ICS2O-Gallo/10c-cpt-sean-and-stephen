@@ -512,7 +512,7 @@ def ground():
 
 # SCREEN ----------------------------------------------------------------------
 def screen_setup():
-    open_window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE, antialiasing=False)
+    open_window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE, antialiasing=True)
     set_background_color(color.SKY_BLUE)
 
     schedule(update_everything, 1 / 60)
