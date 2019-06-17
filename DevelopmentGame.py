@@ -107,7 +107,7 @@ def screens():
 
     start_render()
     # Loading the textures for screen
-    background = load_texture("Textures/background2.png", 0, 0, 2053, 1366)
+    background = load_texture("Textures/background.png", 0, 0, 2053, 1366)
     title = load_texture("Textures/title_text.png", 0, 0, 1225, 459)
     button = load_texture("Textures/label.png", 0, 36, 48, 12)
     game_over = load_texture("Textures/game_over.png", 0, 0, 1074, 144)
