@@ -9,7 +9,7 @@ The goal of this platformer game is to reach the highest score possible as it is
 
 
 ## Controls
-Press "W" to jump, however, the player cannot jump from underneath a platform.
+Press "W" to jump, however, the player cannot jump through a platform.
 
 Press "A" and "D" to move left and right respectively.
 
