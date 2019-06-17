@@ -32,11 +32,11 @@ mouse_button_pos = [
 ]
 
 # Variables for transition from menu into game
-x_transition = 0
 transition_state = False
 screen_tracker = 300
 transition_speed = 20
 instruction_press = -1
+in_instruct_screen = False
 
 # Platform variables
 plat_speed_list = []
@@ -97,12 +97,12 @@ def update_everything(delta_time):
 
     frameCount_gameStart += 1
 
-    print(transition_state)
+    print(screen_tracker)
 
 
 # SCREENS ---------------------------------------------------------------------
 def screens():
-    global button_pos, button_transparency, title_y, title_speed, x_transition
+    global button_pos, button_transparency, title_y, title_speed
     global screen_tracker, transition_state, instruction_press
 
     start_render()
@@ -173,12 +173,12 @@ def screens():
     draw_text("Back", 478, 1640, color.WHITE, 20, font_name="calibri",
               bold=True, italic=True)
 
-    # Final Sore
-    draw_text(f"FINAL SCORE: {score}", 3800, 300, color.WHITE, 25, font_name="calibri")
 
 # Instructions Screen
 def instruction_screen():
+    global in_instruct_screen
     set_viewport(0, 600, 900, 1700)
+    in_instruct_screen = True
 
 
 # Countdown timer in game
@@ -323,26 +323,31 @@ def mouse_detection(x, y, dx, dy):
 
 
 def button_click(x, y, button, modifiers):
-    global button_area_list, screen_tracker, instruction_press, \
-        transition_state
+    global button_area_list, instruction_press, transition_state, \
+        in_instruct_screen
 
     # Start button clicked
-    if button_area_list[0] and button == MOUSE_BUTTON_LEFT and \
-            screen_tracker == 300:
+    if button_area_list[0] and button == MOUSE_BUTTON_LEFT \
+            and screen_tracker == 300 and not in_instruct_screen:
         transition_state = True
 
     # Reset button clicked
-    elif button_area_list[1] and button == MOUSE_BUTTON_LEFT:
+    elif button_area_list[1] and button == MOUSE_BUTTON_LEFT \
+            and screen_tracker == 3300:
         reset()
 
-    elif button_area_list[2] and button == MOUSE_BUTTON_LEFT:
+    # Instruction pressed
+    elif button_area_list[2] and button == MOUSE_BUTTON_LEFT \
+            and screen_tracker == 300:
         instruction_screen()
 
-    elif button_area_list[3] and button == MOUSE_BUTTON_LEFT:
+    # Back button pressed
+    elif button_area_list[3] and button == MOUSE_BUTTON_LEFT \
+            and screen_tracker == 300:
         reset()
 
 
-# PLAYER ------------------------------------------------------------------
+# PLAYER ----------------------------------------------------------------------
 def player():
     global W, A, S, D
     global screen_tracker, jumpDuration, onPlatform, onGround, airTime, \
@@ -429,21 +434,20 @@ def player_score():
 
 
 def death():
-    global jumpSpeed, transition_state, timerCount, instruction_press
+    global jumpSpeed, transition_state, screen_tracker
     set_viewport(3600, 4200, 0, 800)
     # Disables jumping back into game
     jumpSpeed = 0
     transition_state = False
-    # Score will stop adding
-    timerCount = 0
-    
+    screen_tracker += 600
+
+
 def reset():
     global screen_tracker, upProgress, upSpeed, frameCount_playStart
-    global frameCount_gameStart, x_transition, transition_state
+    global frameCount_gameStart, transition_state
     global transition_speed, jumpSpeed, score
 
     # resetting
-    x_transition = 0
     screen_tracker = 300
     transition_speed = 20
 
