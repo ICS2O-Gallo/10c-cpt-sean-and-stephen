@@ -17,11 +17,11 @@ Press "A" and "D" to move left and right respectively.
 ## Menus
 
 
-##### Title Screen
+### Title Screen
 From here, you can go to the game instructions by pressing "Instructions" or press "Play" to start the game when you are ready.
 
-##### Instructions Screen
+### Instructions Screen
 This screen displays the game instructions. You can go back to the title screen by pressing "Back"
 
-##### Game over Screen
+### Game over Screen
 When you die, you will be able to return to the main menu by pressing "Restart". The screen will also display your final score.
