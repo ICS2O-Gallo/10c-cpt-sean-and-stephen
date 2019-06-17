@@ -134,15 +134,18 @@ def screens():
     instruct_back = load_texture("Textures/space.jpg", 0, 0, 320, 480)
     draw_texture_rectangle(300, 1300, 600, 800, instruct_back)
     draw_text("1. Press W to jump.", 50, 1600, color.WHITE, 25,
-              font_name="Calibri")
+              font_name="calibri")
     draw_text("2. Press A to go left, D to go right.", 50, 1450,
-              color.WHITE, 25, font_name="Calibri")
+              color.WHITE, 25, font_name="calibri")
     draw_text("3. You can jump through the platforms.", 50, 1300,
-              color.WHITE, 25, font_name="Calibri")
-    draw_text("4. Stay in the screen to survive and", 50, 1150,
-              color.WHITE, 25, font_name="Calibri")
-    draw_text("improve your score!", 50, 1115, color.WHITE, 25,
-              font_name="Calibri")
+              color.WHITE, 25, font_name="calibri")
+    draw_text("4. Stay in the screen and dodge the lasers", 50, 1150,
+              color.WHITE, 25, font_name="calibri")
+    draw_text("to survive!", 50, 1115, color.WHITE, 25,
+              font_name="calibri")
+    draw_text("5. Keep playing to improve your score!", 50, 975, color.WHITE,
+              25, font_name="calibri")
+
 
     # Putting textures onto screen
     draw_texture_rectangle(300, 450, 600, 900, background)
