@@ -7,11 +7,15 @@ Lasers and Platforms is a platformer game where the player tries to continuously
 ## Goal
 The goal of this platformer game is to reach the highest score possible as it is endlessly spawning platforms and increasing the speed of the border.
 
+
 ## Controls
-Press "W" to jump, however, the player cannot jump form underneath a platform.
+Press "W" to jump, however, the player cannot jump from underneath a platform.
+
 Press "A" and "D" to move left and right respectively.
 
+
 ## Menus
+
 
 ##### Title Screen
 From here, you can go to the game instructions by pressing "Instructions" or press "Play" to start the game when you are ready.
