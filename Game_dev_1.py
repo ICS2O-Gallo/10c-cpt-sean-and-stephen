@@ -173,6 +173,8 @@ def screens():
     draw_text("Back", 478, 1640, color.WHITE, 20, font_name="calibri",
               bold=True, italic=True)
 
+    # Final Sore
+    draw_text(f"FINAL SCORE: {score}", 3800, 300, color.WHITE, 25, font_name="calibri")
 
 # Instructions Screen
 def instruction_screen():
@@ -427,13 +429,14 @@ def player_score():
 
 
 def death():
-    global jumpSpeed, transition_state
+    global jumpSpeed, transition_state, timerCount, instruction_press
     set_viewport(3600, 4200, 0, 800)
     # Disables jumping back into game
     jumpSpeed = 0
     transition_state = False
-
-
+    # Score will stop adding
+    timerCount = 0
+    
 def reset():
     global screen_tracker, upProgress, upSpeed, frameCount_playStart
     global frameCount_gameStart, x_transition, transition_state
