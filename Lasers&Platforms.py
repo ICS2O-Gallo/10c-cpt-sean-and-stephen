@@ -454,7 +454,7 @@ def player():
                 Player_pos[1] = plat_list_y[i] - 50
     # GRAVITY
     # Modified displacement equation to fit game
-    displacement = (1 / 2) * acceleration * airTime
+    displacement = 0.5 * acceleration * airTime
 
     # Player falls onto platform and ground
     if not onPlatform or not onGround:
