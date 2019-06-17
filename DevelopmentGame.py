@@ -55,6 +55,7 @@ jumpSpeed = 25
 acceleration = 1.75
 airTime = 0
 score = 0
+life = 490
 
 # Variables for ground/platform collision
 onPlatform = False
@@ -73,6 +74,15 @@ A = False
 S = False
 D = False
 
+# Laser variables
+laser_x = 2400
+laser_speed = 2
+laser_frequency = 101
+laser_state = False
+laser_fire_timer = 0
+laser_wait_timer = 0
+currentlyFiring = False
+
 
 # UPDATE ----------------------------------------------------------------------
 def update_everything(delta_time):
@@ -86,18 +96,20 @@ def update_everything(delta_time):
     ground()
     player()
     player_score()
+    player_life()
 
     if timerCount == 60:
         score += 1
+        laser()
 
         if frameCount_gameStart % 500 == 0:
-            upSpeed *= 1.5
+            upSpeed += 2
 
         upProgress += upSpeed
 
     frameCount_gameStart += 1
 
-    print(screen_tracker)
+    print(transition_state)
 
 
 # SCREENS ---------------------------------------------------------------------
@@ -174,7 +186,9 @@ def screens():
               bold=True, italic=True)
 
     # Final Sore
-    draw_text(f"FINAL SCORE: {score}", 3800, 300, color.WHITE, 25, font_name="calibri")
+    draw_text(f"FINAL SCORE: {score}", 3800, 300, color.WHITE, 25,
+              font_name="calibri")
+
 
 # Instructions Screen
 def instruction_screen():
@@ -346,6 +360,7 @@ def button_click(x, y, button, modifiers):
     # Back button pressed
     elif button_area_list[3] and button == MOUSE_BUTTON_LEFT \
             and screen_tracker == 300:
+        in_instruct_screen = False
         reset()
 
 
@@ -436,6 +451,18 @@ def player_score():
     draw_text(f"Score: {score}", 2420, upProgress + 750, color.BLACK, 20)
 
 
+def player_life():
+    draw_rectangle_outline(PLAY_AREA_CENTER,
+                           upProgress + 10, 500, 10,
+                           color.BLACK)
+
+    draw_line(2455, upProgress + 10, 2455 + life, upProgress + 10, color.RED,
+              5)
+
+    if life <= 0:
+        death()
+
+
 def death():
     global jumpSpeed, transition_state, screen_tracker, timerCount
     set_viewport(3600, 4200, 0, 800)
@@ -446,10 +473,10 @@ def death():
     # Stop score increase
     timerCount = 0
 
+
 def reset():
     global screen_tracker, upProgress, upSpeed, frameCount_playStart
-    global frameCount_gameStart, transition_state
-    global transition_speed, jumpSpeed, score
+    global frameCount_gameStart, transition_speed, jumpSpeed, score, life
 
     # resetting
     screen_tracker = 300
@@ -461,10 +488,50 @@ def reset():
     frameCount_gameStart = 0
     frameCount_playStart = 0
     jumpSpeed = 25
+    life = 490
 
     remove_platform()
     create_platform()
     set_viewport(0, 600, 0, 800)
+
+
+# LASER -----------------------------------------------------------------------
+warning = load_texture("Textures/warning.png", 0, 0, 400, 400)
+
+
+def laser():
+    global laser_x, laser_speed, laser_state, laser_fire_timer, \
+        laser_wait_timer, currentlyFiring, life
+
+    def fire_laser():
+        global life
+        draw_line(laser_x, upProgress, laser_x, upProgress + 800, color.RED, 4)
+
+        if laser_x - 5 <= Player_pos[0] <= laser_x + 5:
+            life -= 10
+
+    laser_fire_timer += 1
+    if laser_fire_timer <= laser_frequency:
+        fire_laser()
+        currentlyFiring = True
+
+    else:
+        laser_wait_timer += 1
+        if laser_wait_timer == laser_frequency:
+            laser_wait_timer = 0
+            laser_fire_timer = 0
+            currentlyFiring = False
+
+    laser_x += laser_speed
+
+    if laser_x >= 3000:
+        laser_speed = -laser_speed
+
+    if laser_x <= 2400:
+        laser_speed = -laser_speed
+
+    draw_texture_rectangle(laser_x, upProgress + 750,
+                           50, 50, warning)
 
 
 # PLATFORM / GROUND -----------------------------------------------------------
@@ -513,7 +580,7 @@ def ground():
     floor = load_texture("Textures/floor.jpg", 0, 0, 1920, 480)
     draw_texture_rectangle(2700, 50, 600, 100, floor)
 
-    
+
 # SCREEN ----------------------------------------------------------------------
 def screen_setup():
     open_window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
