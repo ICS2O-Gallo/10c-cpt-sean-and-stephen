@@ -134,18 +134,15 @@ def screens():
     instruct_back = load_texture("Textures/space.jpg", 0, 0, 320, 480)
     draw_texture_rectangle(300, 1300, 600, 800, instruct_back)
     draw_text("1. Press W to jump.", 50, 1600, color.WHITE, 25,
-              font_name="calibri")
+              font_name="Calibri")
     draw_text("2. Press A to go left, D to go right.", 50, 1450,
-              color.WHITE, 25, font_name="calibri")
+              color.WHITE, 25, font_name="Calibri")
     draw_text("3. You can jump through the platforms.", 50, 1300,
-              color.WHITE, 25, font_name="calibri")
-    draw_text("4. Stay in the screen and dodge the lasers", 50, 1150,
-              color.WHITE, 25, font_name="calibri")
-    draw_text("to survive!", 50, 1115, color.WHITE, 25,
-              font_name="calibri")
-    draw_text("5. Keep playing to improve your score!", 50, 975, color.WHITE,
-              25, font_name="calibri")
-
+              color.WHITE, 25, font_name="Calibri")
+    draw_text("4. Stay in the screen to survive and", 50, 1150,
+              color.WHITE, 25, font_name="Calibri")
+    draw_text("improve your score!", 50, 1115, color.WHITE, 25,
+              font_name="Calibri")
 
     # Putting textures onto screen
     draw_texture_rectangle(300, 450, 600, 900, background)
@@ -360,7 +357,7 @@ def button_click(x, y, button, modifiers):
 
     # Reset button clicked
     elif button_area_list[1] and button == MOUSE_BUTTON_LEFT \
-            and screen_tracker == 3300:
+            and screen_tracker >= 3300:
         reset()
 
     # Instruction pressed
@@ -454,7 +451,7 @@ def player():
                 Player_pos[1] = plat_list_y[i] - 50
     # GRAVITY
     # Modified displacement equation to fit game
-    displacement = 0.5 * acceleration * airTime
+    displacement = (1 / 2) * acceleration * airTime
 
     # Player falls onto platform and ground
     if not onPlatform or not onGround:
@@ -531,7 +528,7 @@ def laser():
 
         # Collision with player
         if laser_x - 5 <= Player_pos[0] <= laser_x + 5:
-            life -= 10
+            life -= 100
 
     # How long the laser has been firing
     laser_fire_timer += 1
